@@ -1,0 +1,6 @@
+Flask
+pandas
+docxtpl
+python-dotenv
+Werkzeug
+Flask-Mail
