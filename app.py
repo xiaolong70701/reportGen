@@ -1,9 +1,15 @@
-from flask import Flask, request, render_template, send_file, redirect, url_for, session, jsonify, flash
-import pandas as pd
-from docxtpl import DocxTemplate
+import io
+import base64
 import os
 import re
 import json
+from flask import Flask, request, render_template, send_file, redirect, url_for, jsonify, flash, send_from_directory
+import pandas as pd
+import numpy as np
+from docxtpl import DocxTemplate, InlineImage
+from docx.shared import Mm
+import plotly.express as px      
+from docxtpl import DocxTemplate
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -37,6 +43,44 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 mail = Mail(app)
+
+def generate_chart(df, x_col, y_col, chart_type, output_path, dpi_scale=2):
+    fig = None
+
+    if chart_type == 'line':
+        df[x_col] = pd.to_datetime(df[x_col], errors='coerce')
+        daily_df = df.groupby(df[x_col].dt.date).agg({y_col: 'sum'}).reset_index()
+        daily_df.rename(columns={daily_df.columns[0]: x_col}, inplace=True)
+        fig = px.line(daily_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}", template='simple_white')
+    
+    elif chart_type == 'bar':
+        bar_df = df.groupby(x_col).agg({y_col: 'sum'}).reset_index()
+        fig = px.bar(bar_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}", template='simple_white')
+    
+    elif chart_type == 'hist':
+        fig = px.histogram(df, x=y_col, nbins=20, title=f"{y_col} Histogram", template='simple_white')
+    
+    elif chart_type == 'pie':
+        pie_data = df.groupby(x_col)[y_col].sum().reset_index()
+        fig = px.pie(pie_data, values=y_col, names=x_col, title=f"{y_col} 分佈")
+    
+    else:
+        raise ValueError(f"不支援的圖表類型: {chart_type}")
+
+    # 加強版 - 統一主題
+    fig.update_layout(
+        template='none',
+        font_family=os.path.join("fonts", "cwTeXQYuan-Medium.ttf"),
+        title_font_size=20,
+        xaxis_title_font_size=16,
+        yaxis_title_font_size=16,
+        legend_title_font_size=16,
+        font_size=14,
+        paper_bgcolor='white',   # 🔥加這行：外框背景純白
+        plot_bgcolor='white'     # 🔥加這行：繪圖區背景純白
+    )
+
+    fig.write_image(output_path, width=800, height=600, scale=dpi_scale)
 
 def extract_template_variables(template_path):
     doc = DocxTemplate(template_path)
@@ -76,14 +120,13 @@ def convert_docx_to_html(template_path):
 
     for para in document.paragraphs:
         line = para.text
+        # 注意：確保使用 data-variable 而不是 data-var
         line = re.sub(r"\{\{\s*(.*?)\s*\}\}", r'<span class="variable editable" data-variable="\1">{{\1}}</span>', line)
-        html += f"<p>{line}</p>\n"
+        html += f"<div>{line}</div>\n"
 
     return html
 
 def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formulas: dict = None) -> float:
-    import numpy as np
-
     formula = formula.strip()
     if context is None:
         context = {}
@@ -105,10 +148,13 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
                 processed_vars.add(var)
                 try:
                     # 遞迴計算依賴變數的值
-                    context[var] = evaluate_formula(formulas[var], df, context, formulas)
-                    print(f"已計算變數 {var} = {context[var]}")
+                    next_formula = formulas[var]
+                    if isinstance(next_formula, dict) and next_formula.get('type') == 'formula':
+                        next_formula = next_formula.get('value', '')
+                    context[var] = evaluate_formula(next_formula, df, context, formulas)
+                    # print(f"已計算變數 {var} = {context[var]}")
                 except Exception as e:
-                    print(f"計算變數 {var} 時發生錯誤: {str(e)}")
+                    # print(f"計算變數 {var} 時發生錯誤: {str(e)}")
                     raise ValueError(f"變數 {var} 計算錯誤: {str(e)}")
 
         # 處理列名大小寫不敏感
@@ -169,11 +215,24 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
                 # 如果是數值，直接替換
                 formula = re.sub(r'\b' + re.escape(var_name) + r'\b', str(var_value), formula)
 
-        print(f"最終評估公式: {formula}")
+        # print(f"最終評估公式: {formula}")
         eval_globals = {"df": df, "np": np}
         eval_globals.update(context)
 
         result = eval(formula, eval_globals)
+        if any(name in formula for name in ["top_region", "top_product"]):
+            print(f"⚡ DEBUG: 變數評估後結果 type={type(result)}, value={result}")
+
+        if isinstance(result, (list, pd.Series)):
+            if len(result) > 0:
+                result = result[0]
+            else:
+                result = None
+        elif isinstance(result, dict):
+            if result:
+                result = list(result.values())[0]
+            else:
+                result = None
         return result
 
     except Exception as e:
@@ -271,29 +330,34 @@ def render_preview():
     df = pd.DataFrame(data)
     results = {}
     calculated_context = {}
+    special_vars = ['start_date', 'end_date']
 
-    # 計算公式的依賴關係
+    # 建立公式依賴關係圖
     formula_graph = {}
-    for var, formula in formulas.items():
+    for var, formula_info in formulas.items():
+        if isinstance(formula_info, dict) and formula_info.get('type') == 'formula':
+            formula = formula_info.get('value', '')
+        elif isinstance(formula_info, dict) and formula_info.get('type') == 'chart':
+            formula = ''
+        else:
+            formula = formula_info
+
         dependencies = set()
         for other_var in formulas:
-            if other_var != var and re.search(r'\b' + re.escape(other_var) + r'\b', formula):
+            if other_var != var and isinstance(formula, str) and re.search(r'\b' + re.escape(other_var) + r'\b', formula):
                 dependencies.add(other_var)
         formula_graph[var] = dependencies
 
-    # 對公式進行拓撲排序
     visited = set()
     temp_visited = set()
     order = []
 
     def topo_sort(node):
         if node in temp_visited:
-            # 發現循環依賴
             print(f"循環依賴: {node}")
             return
         if node in visited:
             return
-
         temp_visited.add(node)
         for dep in formula_graph.get(node, []):
             topo_sort(dep)
@@ -305,37 +369,102 @@ def render_preview():
         if var not in visited:
             topo_sort(var)
 
-    # 按照拓撲排序順序計算公式
-    order.reverse()  # 反轉，使依賴項先計算
-    print(f"公式計算順序: {order}")
+    order.reverse()
 
-    # 先計算沒有依賴的公式
     for var in formulas:
         if var not in order:
             try:
-                value = evaluate_formula(formulas[var], df, context=calculated_context, formulas=formulas)
-                if hasattr(value, "item"):
-                    value = value.item()
-                if isinstance(value, (int, float)):
-                    value = round(value, 2)
-                results[var] = value
-                calculated_context[var] = value
+                setting = formulas[var]
+                if var in special_vars and 'date' in df.columns:
+                    if var == 'start_date':
+                        value = df['date'].min()
+                    else:
+                        value = df['date'].max()
+                    if pd.isna(value):
+                        value = ''
+                    else:
+                        value = pd.to_datetime(value).strftime('%Y/%m/%d')
+                    results[var] = value
+                    calculated_context[var] = value
+                elif isinstance(setting, dict):
+                    if setting.get('type') == 'formula':
+                        expr = setting.get('value')
+                        value = evaluate_formula(expr, df, context=calculated_context, formulas=formulas)
+                        if hasattr(value, "item"):
+                            value = value.item()
+                        if isinstance(value, (int, float)):
+                            value = round(value, 2)
+                        results[var] = value
+                        calculated_context[var] = value
+                    elif setting.get('type') == 'chart':
+                        results[var] = ''
+                    else:
+                        results[var] = setting.get('value', '')
+                        calculated_context[var] = setting.get('value', '')
+                else:
+                    results[var] = setting
+                    calculated_context[var] = setting
             except Exception as e:
-                print(f"⚡錯誤發生在變數 [{var}]，公式 [{formulas[var]}]，錯誤訊息：{e}")
                 results[var] = f"錯誤: {str(e)}"
 
-    # 按依賴順序計算其餘公式
     for var in order:
         try:
-            value = evaluate_formula(formulas[var], df, context=calculated_context, formulas=formulas)
-            if hasattr(value, "item"):
-                value = value.item()
-            if isinstance(value, (int, float)):
-                value = round(value, 2)
-            results[var] = value
-            calculated_context[var] = value
+            setting = formulas[var]
+            if isinstance(setting, dict):
+                if setting.get('type') == 'chart':
+                    x_col = setting.get('x')
+                    y_col = setting.get('y')
+                    chart_type = setting.get('chartType')
+
+                    if not all([x_col, y_col, chart_type]):
+                        results[var] = '錯誤：缺少圖表設定'
+                        continue
+
+                    fig = None
+                    if chart_type == 'line':
+                        df[x_col] = pd.to_datetime(df[x_col], errors='coerce')
+                        daily_df = df.groupby(df[x_col].dt.date).agg({y_col: 'sum'}).reset_index()
+                        daily_df.rename(columns={daily_df.columns[0]: x_col}, inplace=True)
+                        fig = px.line(daily_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}")
+                    
+                    elif chart_type == 'bar':
+                        bar_df = df.groupby(x_col).agg({y_col: 'sum'}).reset_index()
+                        fig = px.bar(bar_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}")
+                    
+                    elif chart_type == 'hist':
+                        fig = px.histogram(df, x=y_col, nbins=20, title=f"{y_col} Histogram")
+                    
+                    elif chart_type == 'pie':
+                        pie_data = df.groupby(x_col)[y_col].sum().reset_index()
+                        fig = px.pie(pie_data, values=y_col, names=x_col, title=f"{y_col} 分佈")
+                    
+                    else:
+                        results[var] = '錯誤：不支援的圖表類型'
+                        continue
+
+                    save_path = os.path.join('generated', f'{var}.png')
+                    fig.write_image(save_path, width=800, height=600, scale=2)
+
+                    results[var] = ''
+
+                elif setting.get('type') == 'formula':
+                    expr = setting.get('value')
+                    value = evaluate_formula(expr, df, context=calculated_context, formulas=formulas)
+                    if hasattr(value, "item"):
+                        value = value.item()
+                    if isinstance(value, (int, float)):
+                        value = round(value, 2)
+                    results[var] = value
+                    calculated_context[var] = value
+
+                else:
+                    results[var] = setting.get('value', '')
+                    calculated_context[var] = setting.get('value', '')
+            else:
+                results[var] = setting
+                calculated_context[var] = setting
+
         except Exception as e:
-            print(f"⚡錯誤發生在變數 [{var}]，公式 [{formulas[var]}]，錯誤訊息：{e}")
             results[var] = f"錯誤: {str(e)}"
 
     return jsonify(results)
@@ -356,26 +485,28 @@ def render_word():
 
     # 計算公式的依賴關係
     formula_graph = {}
-    for var, formula in formulas.items():
+    for var, formula_info in formulas.items():
+        if isinstance(formula_info, dict) and formula_info.get('type') == 'formula':
+            formula = formula_info.get('value', '')
+        else:
+            formula = formula_info
         dependencies = set()
         for other_var in formulas:
-            if other_var != var and re.search(r'\b' + re.escape(other_var) + r'\b', formula):
+            if other_var != var and isinstance(formula, str) and re.search(r'\b' + re.escape(other_var) + r'\b', formula):
                 dependencies.add(other_var)
         formula_graph[var] = dependencies
 
-    # 對公式進行拓撲排序
+    # 拓撲排序
     visited = set()
     temp_visited = set()
     order = []
 
     def topo_sort(node):
         if node in temp_visited:
-            # 發現循環依賴
             print(f"循環依賴: {node}")
             return
         if node in visited:
             return
-
         temp_visited.add(node)
         for dep in formula_graph.get(node, []):
             topo_sort(dep)
@@ -387,38 +518,82 @@ def render_word():
         if var not in visited:
             topo_sort(var)
 
-    # 按照拓撲排序順序計算公式
-    order.reverse()  # 反轉，使依賴項先計算
+    order.reverse()
     print(f"公式計算順序: {order}")
 
+    doc = DocxTemplate(cached_docx_path)
+
     # 先計算沒有依賴的公式
-    for var in formulas:
+    for var, setting in formulas.items():
         if var not in order:
             try:
-                value = evaluate_formula(formulas[var], filtered_df, context=calculated_context, formulas=formulas)
-                if hasattr(value, "item"):
-                    value = value.item()
-                if isinstance(value, (int, float)):
-                    value = round(value, 2)
-                context[var] = value
-                calculated_context[var] = value
+                if isinstance(setting, dict):
+                    if setting.get('type') == 'formula':
+                        expr = setting.get('value', '')
+                        value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+                        if hasattr(value, "item"):
+                            value = value.item()
+                        if isinstance(value, (int, float)):
+                            value = round(value, 2)
+                        context[var] = value
+                        calculated_context[var] = value
+                    elif setting.get('type') == 'chart':
+                        x_col = setting.get('x')
+                        y_col = setting.get('y')
+                        chart_type = setting.get('chartType')
+                        if not x_col or not y_col or not chart_type:
+                            continue
+                        img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
+                        generate_chart(filtered_df, x_col, y_col, chart_type, img_path)
+                        context[var] = InlineImage(doc, img_path, width=Mm(120))
+                else:
+                    # 舊格式
+                    expr = setting
+                    value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+                    if hasattr(value, "item"):
+                        value = value.item()
+                    if isinstance(value, (int, float)):
+                        value = round(value, 2)
+                    context[var] = value
+                    calculated_context[var] = value
             except Exception as e:
                 context[var] = f"錯誤: {str(e)}"
 
     # 按依賴順序計算其餘公式
     for var in order:
         try:
-            value = evaluate_formula(formulas[var], filtered_df, context=calculated_context, formulas=formulas)
-            if hasattr(value, "item"):
-                value = value.item()
-            if isinstance(value, (int, float)):
-                value = round(value, 2)
-            context[var] = value
-            calculated_context[var] = value
+            setting = formulas[var]
+            if isinstance(setting, dict):
+                if setting.get('type') == 'formula':
+                    expr = setting.get('value', '')
+                    value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+                    if hasattr(value, "item"):
+                        value = value.item()
+                    if isinstance(value, (int, float)):
+                        value = round(value, 2)
+                    context[var] = value
+                    calculated_context[var] = value
+                elif setting.get('type') == 'chart':
+                    x_col = setting.get('x')
+                    y_col = setting.get('y')
+                    chart_type = setting.get('chartType')
+                    if not x_col or not y_col or not chart_type:
+                        continue
+                    img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
+                    generate_chart(filtered_df, x_col, y_col, chart_type, img_path)
+                    context[var] = InlineImage(doc, img_path, width=Mm(120))
+            else:
+                expr = setting
+                value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+                if hasattr(value, "item"):
+                    value = value.item()
+                if isinstance(value, (int, float)):
+                    value = round(value, 2)
+                context[var] = value
+                calculated_context[var] = value
         except Exception as e:
             context[var] = f"錯誤: {str(e)}"
 
-    doc = DocxTemplate(cached_docx_path)
     doc.render(context)
 
     output_path = os.path.join(GENERATED_FOLDER, 'final_report.docx')
@@ -429,8 +604,27 @@ def render_word():
 @app.route('/save_settings', methods=['POST'])
 def save_settings():
     settings = request.json
+    formulas = settings.get('formulas', {})
+
+    # 自動正規化 formulas
+    new_formulas = {}
+    for var, setting in formulas.items():
+        if isinstance(setting, dict) and 'type' in setting:
+            new_formulas[var] = setting
+        else:
+            # 舊格式，補成 type=formula
+            new_formulas[var] = {
+                "type": "formula",
+                "value": setting
+            }
+
+    # 重新組成完整 settings
+    new_settings = {
+        "formulas": new_formulas
+    }
+
     with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-        json.dump(settings, f, ensure_ascii=False, indent=2)
+        json.dump(new_settings, f, ensure_ascii=False, indent=2)
     return "設定已儲存", 200
 
 @app.route('/load_settings', methods=['GET'])
@@ -441,7 +635,76 @@ def load_settings():
     with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
         settings = json.load(f)
 
+    formulas = settings.get('formulas', {})
+    new_formulas = {}
+    for var, setting in formulas.items():
+        if isinstance(setting, dict) and 'type' in setting:
+            new_formulas[var] = setting
+        else:
+            # 舊格式，補成 type=formula
+            new_formulas[var] = {
+                "type": "formula",
+                "value": setting
+            }
+
+    settings['formulas'] = new_formulas
     return jsonify(settings)
+
+@app.route('/get_columns', methods=['GET'])
+def get_columns():
+    global cached_dataframe
+    if cached_dataframe is not None:
+        return jsonify({"columns": list(cached_dataframe.columns)})
+    else:
+        return jsonify({"columns": []})
+
+@app.route('/generated/<path:filename>')
+def serve_generated_file(filename):
+    return send_from_directory('generated', filename)
+
+@app.route('/regenerate_chart', methods=['POST'])
+def regenerate_chart():
+    content = request.get_json()
+
+    var_name = content.get('varName')
+    x_col = content.get('x')
+    y_col = content.get('y')
+    chart_type = content.get('chartType')
+    data = content.get('data')
+    dpi_scale = content.get('dpi', 2)  # 🔥 預設 dpi_scale 2
+
+    if not all([var_name, x_col, y_col, chart_type, data]):
+        return jsonify({'error': '缺少必要參數'}), 400
+
+    df = pd.DataFrame(data)
+
+    if df.empty:
+        return jsonify({'error': '沒有資料'}), 400
+
+    try:
+        save_path = os.path.join('generated', f'{var_name}.png')
+        generate_chart(df, x_col, y_col, chart_type, save_path, dpi_scale=dpi_scale)  # 🔥 使用上面的 generate_chart
+        return jsonify({'message': '重新產生完成'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/get_chart_preview', methods=['POST'])
+def get_chart_preview():
+    content = request.get_json()
+    var_name = content.get('varName')  # 🔥 傳進來變數名
+    
+    if not var_name:
+        return jsonify({'error': '缺少變數名稱'}), 400
+
+    filename = f"{var_name}.png"  # 圖片檔案命名規則
+    filepath = os.path.join('generated', filename)
+
+    if not os.path.exists(filepath):
+        return jsonify({'error': '找不到圖片'}), 404
+
+    # 🔥 回傳圖片 URL，而不是 base64
+    return jsonify({'image_url': url_for('static', filename=f'../generated/{filename}')})
+
 
 # 聯絡表單處理路由
 @app.route('/contact', methods=['POST'])

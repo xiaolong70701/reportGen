@@ -157,11 +157,14 @@
             cursor: pointer;
             transition: all 0.2s;
             display: inline-block;
-            margin: 0 2px;
+            margin-left: auto;
+            margin-right: auto;
             border: 1px solid rgba(67, 97, 238, 0.2);
         }
         
         .variable.editable:hover {
+            margin-left: auto;
+            margin-right: auto;
             background-color: rgba(67, 97, 238, 0.2);
             transform: translateY(-2px);
             box-shadow: 0 3px 8px rgba(67, 97, 238, 0.15);
@@ -183,6 +186,7 @@
             line-height: 1.8;
             border: 1px solid #E2E8F0;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+            overflow: visible;
         }
         
         /* Modal 樣式 */
@@ -285,6 +289,102 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            .chart-container {
+                margin: 15px -20px;
+                max-width: calc(100% + 40px);
+                padding: 15px;
+            }
+            
+            .chart-image-container {
+                height: 350px !important;
+            }
+        }
+        
+        .chart-container {
+            margin: 15px -50px; /* 負邊距使容器變寬 */
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+        }
+
+        .chart-preview {
+            border-radius: 12px;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            max-width: 100%;
+        }
+
+        .chart-preview-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .chart-preview-toggle:hover {
+            transform: translateY(-2px);
+        }
+        
+        .chart-preview {
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-image-container {
+            width: 100%;
+            height: 400px !important; /* 增加圖表高度 */
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white !important;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .chart-info {
+            font-size: 0.85rem;
+            color: #666;
+            background-color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .quick-edit-chart-btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+
+        .quick-edit-chart-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
     </style>
 </head>
@@ -379,40 +479,94 @@
 </div>
 
 <!-- 公式設定 Modal -->
+<!-- 公式設定 Modal -->
 <div class="modal fade" id="formulaModal" tabindex="-1" aria-labelledby="formulaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="formulaModalLabel">
-                    <i class="bi bi-calculator me-2"></i>設定變數公式
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label for="variableName" class="form-label">變數名稱</label>
-                    <input type="text" id="variableName" class="form-control" readonly>
-                </div>
-                <div class="mb-4">
-                    <label for="formulaInput" class="form-label">公式</label>
-                    <input type="text" id="formulaInput" class="form-control" placeholder="例如 SUM(price)">
-                    <div class="form-text mt-2">
-                        <i class="bi bi-code-square me-1"></i>支援函數：SUM, MEAN, MAX, MIN, COUNT, MEDIAN, STD, VAR, PERCENT_CHANGE, DIFF, CAGR
-                    </div>
-                </div>
-                <div class="d-grid">
-                    <button type="button" id="saveFormulaBtn" class="btn btn-primary">
-                        <i class="bi bi-check-lg me-2"></i>儲存設定
-                    </button>
-                </div>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="formulaModalLabel">
+            <i class="bi bi-calculator me-2"></i>設定變數公式 / 圖表
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
         </div>
+        <div class="modal-body">
+          
+          <!-- 變數名稱 -->
+          <div class="mb-4">
+            <label for="variableName" class="form-label">變數名稱</label>
+            <input type="text" id="variableName" class="form-control" readonly>
+          </div>
+  
+          <!-- 變數類型選擇 -->
+          <div class="mb-4">
+            <label class="form-label">變數類型</label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="variableType" id="typeFormula" value="formula" checked>
+              <label class="form-check-label" for="typeFormula">
+                數字公式
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="variableType" id="typeChart" value="chart">
+              <label class="form-check-label" for="typeChart">
+                圖表
+              </label>
+            </div>
+          </div>
+  
+          <!-- 數字公式區 -->
+          <div id="formulaFields">
+            <div class="mb-4">
+              <label for="formulaInput" class="form-label">公式</label>
+              <input type="text" id="formulaInput" class="form-control" placeholder="例如 SUM(price)">
+              <div class="form-text">
+                支援函數：SUM, MEAN, MAX, MIN, COUNT, MEDIAN, STD, VAR, PERCENT_CHANGE, DIFF, CAGR
+              </div>
+            </div>
+          </div>
+  
+          <!-- 圖表設定區 -->
+          <div id="chartFields" style="display: none;">
+            <div class="mb-4">
+              <label for="xAxisSelect" class="form-label">X 軸欄位</label>
+              <select id="xAxisSelect" class="form-select">
+                <!-- 這裡用 JavaScript 動態填 -->
+              </select>
+            </div>
+            <div class="mb-4">
+              <label for="yAxisSelect" class="form-label">Y 軸欄位</label>
+              <select id="yAxisSelect" class="form-select">
+                <!-- 這裡用 JavaScript 動態填 -->
+              </select>
+            </div>
+            <div class="mb-4">
+              <label for="chartTypeSelect" class="form-label">圖表類型</label>
+              <select id="chartTypeSelect" class="form-select">
+                <option value="line">折線圖（Line）</option>
+                <option value="bar">長條圖（Bar）</option>
+                <option value="hist">直方圖（Histogram）</option>
+                <option value="pie">圓餅圖（Pie）</option>
+              </select>
+            </div>
+          </div>
+  
+          <!-- 儲存按鈕 -->
+          <div class="d-grid">
+            <button type="button" id="saveFormulaBtn" class="btn btn-primary">
+              <i class="bi bi-check-lg me-2"></i>儲存設定
+            </button>
+          </div>
+  
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+  
 
 <!-- 引入 js -->
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <!-- 自動載入 settings.json -->
 <script>
@@ -541,14 +695,53 @@ document.querySelectorAll('input[type="date"]').forEach(input => {
 function openFormulaModal(varName) {
     const modal = new bootstrap.Modal(document.getElementById('formulaModal'));
     document.getElementById('variableName').value = varName;
-    
-    // 如果已有公式，顯示現有公式
+
     if (window.formulas && window.formulas[varName]) {
-        document.getElementById('formulaInput').value = window.formulas[varName];
+        const setting = window.formulas[varName];
+        if (typeof setting === 'object' && setting.type === 'chart') {
+            // 顯示圖表設定
+            document.getElementById('typeChart').checked = true;
+            document.getElementById('formulaFields').style.display = 'none';
+            document.getElementById('chartFields').style.display = 'block';
+        } else {
+            // 顯示公式設定
+            document.getElementById('typeFormula').checked = true;
+            document.getElementById('formulaFields').style.display = 'block';
+            document.getElementById('chartFields').style.display = 'none';
+            document.getElementById('formulaInput').value = typeof setting === 'string' ? setting : (setting.value || '');
+        }
     } else {
+        // 預設顯示公式設定
+        document.getElementById('typeFormula').checked = true;
+        document.getElementById('formulaFields').style.display = 'block';
+        document.getElementById('chartFields').style.display = 'none';
         document.getElementById('formulaInput').value = '';
     }
-    
+
+    // 🔥 新增！載入 CSV 欄位填入 X 軸與 Y 軸選單
+    fetch('/get_columns')
+        .then(response => response.json())
+        .then(data => {
+            const xAxisSelect = document.getElementById('xAxisSelect');
+            const yAxisSelect = document.getElementById('yAxisSelect');
+            xAxisSelect.innerHTML = '';
+            yAxisSelect.innerHTML = '';
+
+            if (data.columns && data.columns.length > 0) {
+                data.columns.forEach(col => {
+                    const xOption = document.createElement('option');
+                    xOption.value = col;
+                    xOption.textContent = col;
+                    xAxisSelect.appendChild(xOption);
+
+                    const yOption = document.createElement('option');
+                    yOption.value = col;
+                    yOption.textContent = col;
+                    yAxisSelect.appendChild(yOption);
+                });
+            }
+        });
+
     modal.show();
 }
 
