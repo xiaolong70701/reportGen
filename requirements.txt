@@ -5,4 +5,4 @@ python-dotenv
 Werkzeug
 Flask-Mail
 gunicorn
-plotnine
+plotly
