@@ -6,3 +6,4 @@ Werkzeug
 Flask-Mail
 gunicorn
 plotly
+kaleido
