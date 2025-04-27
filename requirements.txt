@@ -4,3 +4,4 @@ docxtpl
 python-dotenv
 Werkzeug
 Flask-Mail
+gunicorn
