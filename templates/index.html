@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上傳資料</title>
+  <link rel="icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4cc9f0;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+    }
+    
+    body {
+      background-color: var(--light-bg);
+      color: var(--dark-text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    .upload-card {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    
+    .upload-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .header-icon {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    
+    .custom-file-input {
+      position: relative;
+      border: 2px dashed #dee2e6;
+      border-radius: 12px;
+      padding: 2rem 1rem;
+      text-align: center;
+      transition: all 0.3s;
+      background-color: rgba(67, 97, 238, 0.03);
+    }
+    
+    .custom-file-input:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .file-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--secondary-color);
+    }
+    
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #495057;
+    }
+    
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.8rem 2rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+    }
+    
+    .input-real {
+      opacity: 0;
+      height: 0;
+      width: 0;
+      position: absolute;
+    }
+    
+    .file-label {
+      display: block;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    .file-name {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #6c757d;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      height: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="upload-card card shadow p-4 p-md-5">
+        
+        <div class="text-center mb-5">
+          <div class="header-icon">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+          <h1 class="fw-bold mb-3">上傳資料</h1>
+          <p class="text-muted">請上傳 Word 模板、CSV 資料檔案，如果有設定檔也可以一起上傳。</p>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data" class="row g-4">
+          
+          <!-- Word 模板上傳 -->
+          <div class="col-12">
+            <label for="docx_file_real" class="form-label"><i class="bi bi-file-earmark-word me-2"></i>Word 模板 (.docx)</label>
+            <div class="custom-file-input">
+              <label class="file-label" for="docx_file_real">
+                <div class="file-icon">
+                  <i class="bi bi-file-earmark-word"></i>
+                </div>
+                <div>點擊或拖放 Word 檔案</div>
+                <div class="file-name" id="docx_file_name">尚未選擇檔案</div>
+              </label>
+              <input type="file" class="input-real" id="docx_file_real" name="docx_file" accept=".docx" required>
+            </div>
+          </div>
+          
+          <!-- CSV 資料檔案上傳 -->
+          <div class="col-12">
+            <label for="csv_file_real" class="form-label"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV 資料檔案 (.csv)</label>
+            <div class="custom-file-input">
+              <label class="file-label" for="csv_file_real">
+                <div class="file-icon">
+                  <i class="bi bi-file-earmark-excel"></i>
+                </div>
+                <div>點擊或拖放 CSV 檔案</div>
+                <div class="file-name" id="csv_file_name">尚未選擇檔案</div>
+              </label>
+              <input type="file" class="input-real" id="csv_file_real" name="csv_file" accept=".csv" required>
+            </div>
+          </div>
+          
+          <!-- 設定檔上傳 -->
+          <div class="col-12">
+            <label for="settings_file_real" class="form-label"><i class="bi bi-gear me-2"></i>設定檔 (可選) (.json)</label>
+            <div class="custom-file-input">
+              <label class="file-label" for="settings_file_real">
+                <div class="file-icon">
+                  <i class="bi bi-file-earmark-code"></i>
+                </div>
+                <div>點擊或拖放設定檔 (選填)</div>
+                <div class="file-name" id="settings_file_name">尚未選擇檔案</div>
+              </label>
+              <input type="file" class="input-real" id="settings_file_real" name="settings_file" accept=".json">
+            </div>
+            <div class="form-text mt-2">如果是第一次設定，可以不用上傳設定檔。</div>
+          </div>
+          
+          <!-- 送出按鈕 -->
+          <div class="col-12 d-grid mt-4">
+            <button type="submit" class="submit-btn btn btn-primary btn-lg">
+              <i class="bi bi-rocket me-2"></i>開始設定
+            </button>
+          </div>
+          
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // 檔案選擇後顯示檔名
+  document.getElementById('docx_file_real').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
+    document.getElementById('docx_file_name').textContent = fileName;
+  });
+  
+  document.getElementById('csv_file_real').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
+    document.getElementById('csv_file_name').textContent = fileName;
+  });
+  
+  document.getElementById('settings_file_real').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
+    document.getElementById('settings_file_name').textContent = fileName;
+  });
+  
+  // 拖放檔案功能
+  const fileInputs = document.querySelectorAll('.custom-file-input');
+  
+  fileInputs.forEach(fileInput => {
+    fileInput.addEventListener('dragover', e => {
+      e.preventDefault();
+      fileInput.style.borderColor = '#4361ee';
+      fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+    });
+    
+    fileInput.addEventListener('dragleave', e => {
+      e.preventDefault();
+      fileInput.style.borderColor = '#dee2e6';
+      fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+    });
+    
+    fileInput.addEventListener('drop', e => {
+      e.preventDefault();
+      fileInput.style.borderColor = '#dee2e6';
+      fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+      
+      const input = fileInput.querySelector('input[type="file"]');
+      if (e.dataTransfer.files.length > 0 && input.accept.includes(e.dataTransfer.files[0].name.split('.').pop())) {
+        input.files = e.dataTransfer.files;
+        
+        // 觸發 change 事件
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+      }
+    });
+  });
+</script>
+</body>
+</html>

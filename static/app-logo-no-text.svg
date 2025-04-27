@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圓形 -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4361ee" />
+      <stop offset="100%" stop-color="#3f37c9" />
+    </linearGradient>
+    <linearGradient id="documentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0f0f0" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="2" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 主圓形 -->
+  <circle cx="50" cy="50" r="45" fill="url(#logoGradient)" filter="url(#shadow)" />
+  
+  <!-- 文檔圖示 -->
+  <g transform="translate(27, 25)">
+    <!-- 文檔底層 -->
+    <path d="M 5 0 L 35 0 L 45 10 L 45 50 L 5 50 L 5 0 Z" fill="url(#documentGradient)" filter="url(#shadow)" />
+    <!-- 文檔折角 -->
+    <path d="M 35 0 L 35 10 L 45 10 Z" fill="#e0e0e0" />
+    
+    <!-- 文檔線條 -->
+    <line x1="12" y1="15" x2="38" y2="15" stroke="#4361ee" stroke-width="2" stroke-linecap="round" />
+    <line x1="12" y1="22" x2="38" y2="22" stroke="#4361ee" stroke-width="2" stroke-linecap="round" />
+    <line x1="12" y1="29" x2="38" y2="29" stroke="#4361ee" stroke-width="2" stroke-linecap="round" />
+    <line x1="12" y1="36" x2="30" y2="36" stroke="#4361ee" stroke-width="2" stroke-linecap="round" />
+    
+    <!-- 數據圖表符號 -->
+    <rect x="15" y="38" width="4" height="7" fill="#4cc9f0" rx="1" />
+    <rect x="21" y="34" width="4" height="11" fill="#4cc9f0" rx="1" />
+    <rect x="27" y="37" width="4" height="8" fill="#4cc9f0" rx="1" />
+    <rect x="33" y="32" width="4" height="13" fill="#4cc9f0" rx="1" />
+  </g>
+  
+  <!-- 箭頭和數據流 -->
+  <g transform="translate(42, 42)">
+    <circle cx="8" cy="8" r="2" fill="#ffffff" />
+    <circle cx="0" cy="16" r="2" fill="#ffffff" />
+    <circle cx="16" cy="0" r="2" fill="#ffffff" />
+    <path d="M 8 8 L 24 24" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+    <circle cx="24" cy="24" r="3" fill="#ffffff" />
+  </g>
+</svg>
