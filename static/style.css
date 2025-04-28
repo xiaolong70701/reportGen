@@ -1,136 +1,398 @@
-/* static/style.css */
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4cc9f0;
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+    --success-color: #2ECC71;
+    --warning-color: #F39C12;
+    --danger-color: #E74C3C;
+    --text-color: #2D3748;
+    --light-text: #718096;
+}
 
-/* 全局設定 */
 body {
-    background-color: #ECF0F1;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #2C3E50;
+background-color: var(--light-bg);
+color: var(--dark-text);
+font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* 標題 */
-h1, h5, h6 {
-    color: #2C3E50;
+.upload-card {
+border-radius: 16px;
+border: none;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+overflow: hidden;
+transition: transform 0.3s ease;
 }
 
-/* 卡片 */
-.card {
-    background: #ffffff;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.upload-card:hover {
+transform: translateY(-5px);
 }
 
-/* 表單元素 */
+.header-icon {
+font-size: 2.5rem;
+color: var(--primary-color);
+margin-bottom: 1rem;
+}
+
+.custom-file-input {
+position: relative;
+border: 2px dashed #dee2e6;
+border-radius: 12px;
+padding: 2rem 1rem;
+text-align: center;
+transition: all 0.3s;
+background-color: rgba(67, 97, 238, 0.03);
+}
+
+.custom-file-input:hover {
+border-color: var(--primary-color);
+background-color: rgba(67, 97, 238, 0.05);
+}
+
+.file-icon {
+font-size: 2rem;
+margin-bottom: 1rem;
+color: var(--secondary-color);
+}
+
 .form-label {
-    font-weight: bold;
+font-weight: 600;
+margin-bottom: 0.5rem;
+color: #495057;
 }
 
-input[type="date"], input[type="text"], select, textarea {
-    background-color: #F9FAFB;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 10px;
+.submit-btn {
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+border: none;
+border-radius: 12px;
+font-weight: 600;
+padding: 0.8rem 2rem;
+transition: all 0.3s;
+box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
 }
 
-/* 按鈕統一樣式 */
-button, .btn {
-    font-size: 16px;
-    border-radius: 8px;
-    padding: 10px 20px;
+.submit-btn:hover {
+transform: translateY(-3px);
+box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
 }
 
-.btn-primary {
-    background-color: #3498DB;
-    border: none;
+.input-real {
+opacity: 0;
+height: 0;
+width: 0;
+position: absolute;
 }
 
-.btn-success {
-    background-color: #2ECC71;
-    border: none;
+.file-label {
+display: block;
+cursor: pointer;
+width: 100%;
 }
 
-.btn-danger {
-    background-color: #E74C3C;
-    border: none;
+.file-name {
+margin-top: 1rem;
+font-size: 0.9rem;
+color: #6c757d;
+max-width: 100%;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+height: 1.5rem;
 }
 
-.btn-primary:hover, .btn-success:hover, .btn-danger:hover {
-    opacity: 0.9;
+:root {
+--primary-color: #4361ee;
+--secondary-color: #3f37c9;
+--accent-color: #4cc9f0;
+--light-bg: #f8f9fa;
+--dark-text: #212529;
+--card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* 預覽變數樣式 */
-.variable {
-    background-color: #e7f1ff;
-    color: #007BFF;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
+body {
+background-color: var(--light-bg);
+color: var(--dark-text);
+font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
 }
 
-/* 可編輯變數 hover 效果 */
-.variable.editable:hover {
-    background-color: #cce5ff;
+.hero-section {
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+color: white;
+padding: 5rem 0;
+margin-bottom: 3rem;
+border-radius: 0 0 30px 30px;
+box-shadow: var(--card-shadow);
 }
 
-/* 如果變數有錯誤（動態加 class 用的） */
-.variable.error {
-    background-color: #FFE5E5;
-    color: #E74C3C;
+.hero-title {
+font-size: 3rem;
+font-weight: 700;
+margin-bottom: 1rem;
 }
 
-/* 預覽結果容器 */
-#previewResult {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    min-height: 200px;
-    font-size: 18px;
-    line-height: 1.6;
+.hero-subtitle {
+font-size: 1.25rem;
+opacity: 0.85;
+max-width: 700px;
+margin: 0 auto 2rem auto;
 }
 
-/* Modal 小視窗 */
-.modal-content {
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+.feature-card {
+background-color: white;
+border-radius: 16px;
+border: none;
+box-shadow: var(--card-shadow);
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+height: 100%;
+overflow: hidden;
 }
 
-/* Modal 輸入框 */
-#formulaInput {
-    font-family: 'Courier New', Courier, monospace;
+.feature-card:hover {
+transform: translateY(-10px);
+box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
-/* 小提示文字 */
-.form-text {
-    font-size: 14px;
-    color: #7f8c8d;
+.feature-icon {
+font-size: 3rem;
+margin-bottom: 1.5rem;
+color: var(--primary-color);
 }
 
-/* 產生報告按鈕 */
-#generateForm button {
-    width: 100%;
-    margin-top: 20px;
-    font-size: 20px;
-    padding: 14px 0;
+.feature-title {
+font-weight: 600;
+margin-bottom: 1rem;
+color: var(--dark-text);
 }
 
-/* 卡片內標題 */
-.card-title {
-    font-weight: bold;
-    margin-bottom: 20px;
+.feature-text {
+color: #6c757d;
+font-size: 1rem;
+line-height: 1.6;
 }
 
-/* Loading 遮罩 */
-#loadingOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
-    z-index: 1050;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.cta-button, .cta-button:focus, .cta-button:active, .cta-button:hover {
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+border: none;
+border-radius: 50px;
+padding: 0.75rem 2rem;
+font-weight: 600;
+font-size: 1.1rem;
+box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+color: white;
+text-align: center;
+text-decoration: none;
+transition: all 0.3s;
+}
+
+.cta-button-secondary {
+background: transparent;
+color: white;
+border: 2px solid white;
+border-radius: 50px;
+padding: 0.75rem 2rem;
+font-weight: 600;
+font-size: 1.1rem;
+text-align: center;
+text-decoration: none;
+transition: all 0.3s;
+}
+
+.cta-button-secondary:hover {
+background: rgba(255, 255, 255, 0.1);
+color: white;
+}
+
+.cta-button:hover {
+transform: translateY(-3px);
+box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+color: white;
+}
+
+.navbar {
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+background-color: white;
+}
+
+.navbar-brand {
+font-weight: 700;
+color: var(--primary-color);
+}
+
+.nav-link {
+font-weight: 500;
+color: var(--dark-text);
+transition: color 0.3s;
+}
+
+.nav-link:hover {
+color: var(--primary-color);
+}
+
+.nav-link.active {
+color: var(--primary-color);
+}
+
+.footer {
+background-color: white;
+padding: 3rem 0;
+margin-top: auto;
+box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.footer-links {
+list-style: none;
+padding: 0;
+}
+
+.footer-links li {
+margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+color: #6c757d;
+text-decoration: none;
+transition: color 0.3s;
+}
+
+.footer-links a:hover {
+color: var(--primary-color);
+}
+
+.social-icons {
+font-size: 1.5rem;
+}
+
+.social-icons a {
+color: #6c757d;
+margin-right: 1rem;
+transition: color 0.3s;
+}
+
+.social-icons a:hover {
+color: var(--primary-color);
+}
+
+.footer-text {
+color: #6c757d;
+margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+.hero-title {
+    font-size: 2.2rem;
+}
+
+.hero-section {
+    padding: 3rem 0;
+}
+
+.feature-card {
+    margin-bottom: 1.5rem;
+}
+}
+
+#contact-success-message {
+color: var(--primary-color);
+}
+
+:root {
+--primary-color: #4361ee;
+--secondary-color: #3f37c9;
+--accent-color: #4cc9f0;
+--light-bg: #f8f9fa;
+--dark-text: #212529;
+}
+
+body {
+background-color: var(--light-bg);
+color: var(--dark-text);
+font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.upload-card {
+border-radius: 16px;
+border: none;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+overflow: hidden;
+transition: transform 0.3s ease;
+}
+
+.upload-card:hover {
+transform: translateY(-5px);
+}
+
+.header-icon {
+font-size: 2.5rem;
+color: var(--primary-color);
+margin-bottom: 1rem;
+}
+
+.custom-file-input {
+position: relative;
+border: 2px dashed #dee2e6;
+border-radius: 12px;
+padding: 2rem 1rem;
+text-align: center;
+transition: all 0.3s;
+background-color: rgba(67, 97, 238, 0.03);
+}
+
+.custom-file-input:hover {
+border-color: var(--primary-color);
+background-color: rgba(67, 97, 238, 0.05);
+}
+
+.file-icon {
+font-size: 2rem;
+margin-bottom: 1rem;
+color: var(--secondary-color);
+}
+
+.form-label {
+font-weight: 600;
+margin-bottom: 0.5rem;
+color: #495057;
+}
+
+.submit-btn {
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+border: none;
+border-radius: 12px;
+font-weight: 600;
+padding: 0.8rem 2rem;
+transition: all 0.3s;
+box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.submit-btn:hover {
+transform: translateY(-3px);
+box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+}
+
+.input-real {
+opacity: 0;
+height: 0;
+width: 0;
+position: absolute;
+}
+
+.file-label {
+display: block;
+cursor: pointer;
+width: 100%;
+}
+
+.file-name {
+margin-top: 1rem;
+font-size: 0.9rem;
+color: #6c757d;
+max-width: 100%;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+height: 1.5rem;
 }

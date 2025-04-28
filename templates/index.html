@@ -9,107 +9,31 @@
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <style>
-    :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3f37c9;
-      --accent-color: #4cc9f0;
-      --light-bg: #f8f9fa;
-      --dark-text: #212529;
-    }
-    
-    body {
-      background-color: var(--light-bg);
-      color: var(--dark-text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
-    
-    .upload-card {
-      border-radius: 16px;
-      border: none;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      transition: transform 0.3s ease;
-    }
-    
-    .upload-card:hover {
-      transform: translateY(-5px);
-    }
-    
-    .header-icon {
-      font-size: 2.5rem;
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-    }
-    
-    .custom-file-input {
-      position: relative;
-      border: 2px dashed #dee2e6;
-      border-radius: 12px;
-      padding: 2rem 1rem;
-      text-align: center;
-      transition: all 0.3s;
-      background-color: rgba(67, 97, 238, 0.03);
-    }
-    
-    .custom-file-input:hover {
-      border-color: var(--primary-color);
-      background-color: rgba(67, 97, 238, 0.05);
-    }
-    
-    .file-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: var(--secondary-color);
-    }
-    
-    .form-label {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #495057;
-    }
-    
-    .submit-btn {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      padding: 0.8rem 2rem;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-    }
-    
-    .submit-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
-    }
-    
-    .input-real {
-      opacity: 0;
-      height: 0;
-      width: 0;
-      position: absolute;
-    }
-    
-    .file-label {
-      display: block;
-      cursor: pointer;
-      width: 100%;
-    }
-    
-    .file-name {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #6c757d;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      height: 1.5rem;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+      <i class="bi bi-file-earmark-word me-2"></i>
+      <span>Word 報表生成器</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="{{ url_for('home') }}">首頁</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('index') }}">上傳檔案</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
 <div class="container py-5">
   <div class="row justify-content-center">
