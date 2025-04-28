@@ -45,8 +45,6 @@ function setupChartToggles() {
 }
 
 function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, chartTitle) {
-    console.log(`【開始生成圖表】變數: ${varName}, X軸: ${xAxis}, Y軸: ${yAxis}, 類型: ${chartType}, 標題: "${chartTitle}"`);
-    console.log(`formulas[${varName}]:`, JSON.stringify(formulas[varName]));
     const chartContainer = document.getElementById(`chart-${varName}`);
     chartContainer.innerHTML = '';
 
@@ -61,15 +59,8 @@ function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, ch
     plotArea.style.maxWidth = '800px';
     plotArea.style.margin = '0 auto';
     chartContainer.appendChild(plotArea);
-    
-    // 對標題進行特殊處理 - 徹底解決問題
-    // 如果有提供標題就使用它，否則使用變數名稱
-    // 注意：空字串 "" 應被視為有效標題（用戶想要清空標題）
+
     const finalTitle = (chartTitle !== undefined && chartTitle !== null) ? chartTitle : varName;
-    
-    console.log(`處理變數 ${varName} 的圖表，標題: "${finalTitle}"`);
-    console.log(`圖表標題參數 (${varName}): "${chartTitle}"`);
-    console.log(`最終設定的標題: "${finalTitle}"`);
 
     let plotData = [];
     
@@ -91,9 +82,6 @@ function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, ch
             xanchor: 'center'
         };
     }
-    
-    // 記錄 layout 設定
-    console.log('Plotly 使用的 layout:', JSON.stringify(layout));
 
     if (chartType === 'line') {
         const grouped = {};
@@ -259,9 +247,6 @@ function openQuickEditModal(varName, chartSetting) {
                 // 修正：正確設定圖表標題到輸入框
                 const titleInput = document.getElementById('quickEditChartTitle');
                 titleInput.value = chartSetting.chartTitle || '';
-                
-                // 記錄用於除錯
-                console.log(`打開快速編輯模態視窗: ${varName}, 載入標題: "${chartSetting.chartTitle}"`);
             }
         });
     
@@ -283,9 +268,6 @@ function openQuickEditModal(varName, chartSetting) {
             return;
         }
     
-        // 除錯：記錄標題值
-        console.log(`儲存按鈕 - 變數: ${currentVariable}, 設定標題值: "${newChartTitle}"`);
-    
         // 更新 formulas 物件
         formulas[currentVariable] = {
             type: 'chart',
@@ -294,9 +276,6 @@ function openQuickEditModal(varName, chartSetting) {
             chartType: newChartType,
             chartTitle: newChartTitle  // 直接使用輸入值，不進行加工
         };
-    
-        // 除錯：確認 formulas 已更新
-        console.log(`formulas[${currentVariable}] 已更新:`, JSON.stringify(formulas[currentVariable]));
     
         // 呼叫後端重新生成圖
         fetch('/regenerate_chart', {
@@ -617,12 +596,15 @@ document.getElementById('generateForm').addEventListener('submit', function(e) {
     e.preventDefault();
     showLoading();
 
+    const filename = document.getElementById('docxFileName').value.trim() || 'weekly_report.docx';
+
     fetch('/render', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             formulas: formulas,
-            data: currentFilteredData
+            data: currentFilteredData,
+            filename: filename
         })
     })
     .then(response => response.blob())
@@ -631,7 +613,12 @@ document.getElementById('generateForm').addEventListener('submit', function(e) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = "weekly_report.docx";
+        const filenameInput = document.getElementById('docxFileName').value.trim() || 'weekly_report.docx';
+        let finalFilename = filenameInput;
+        if (!finalFilename.toLowerCase().endsWith('.docx')) {
+            finalFilename += '.docx';  // 自動補上 .docx
+        }
+        a.download = finalFilename;
         document.body.appendChild(a);
         a.click();
         a.remove();

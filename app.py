@@ -44,25 +44,27 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 mail = Mail(app)
 
-def generate_chart(df, x_col, y_col, chart_type, output_path, dpi_scale=2):
+def generate_chart(df, x_col, y_col, chart_type, output_path, chart_title=None, dpi_scale=2):
     fig = None
+
+    title = chart_title if chart_title else f"{y_col} by {x_col}"
 
     if chart_type == 'line':
         df[x_col] = pd.to_datetime(df[x_col], errors='coerce')
         daily_df = df.groupby(df[x_col].dt.date).agg({y_col: 'sum'}).reset_index()
         daily_df.rename(columns={daily_df.columns[0]: x_col}, inplace=True)
-        fig = px.line(daily_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}", template='simple_white')
+        fig = px.line(daily_df, x=x_col, y=y_col, title=title, template='simple_white')
     
     elif chart_type == 'bar':
         bar_df = df.groupby(x_col).agg({y_col: 'sum'}).reset_index()
-        fig = px.bar(bar_df, x=x_col, y=y_col, title=f"{y_col} by {x_col}", template='simple_white')
+        fig = px.bar(bar_df, x=x_col, y=y_col, title=title, template='simple_white')
     
     elif chart_type == 'hist':
-        fig = px.histogram(df, x=y_col, nbins=20, title=f"{y_col} Histogram", template='simple_white')
+        fig = px.histogram(df, x=y_col, nbins=20, title=title, template='simple_white')
     
     elif chart_type == 'pie':
         pie_data = df.groupby(x_col)[y_col].sum().reset_index()
-        fig = px.pie(pie_data, values=y_col, names=x_col, title=f"{y_col} 分佈")
+        fig = px.pie(pie_data, values=y_col, names=x_col, title=title)
     
     else:
         raise ValueError(f"不支援的圖表類型: {chart_type}")
@@ -471,6 +473,7 @@ def render_word():
 
     formulas = request.json.get('formulas', {})
     data = request.json.get('data', [])
+    filename = request.json.get('filename', 'final_report.docx')
 
     if not data:
         return "資料錯誤", 400
@@ -537,10 +540,11 @@ def render_word():
                         x_col = setting.get('x')
                         y_col = setting.get('y')
                         chart_type = setting.get('chartType')
+                        chart_title = setting.get('chartTitle')
                         if not x_col or not y_col or not chart_type:
                             continue
                         img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
-                        generate_chart(filtered_df, x_col, y_col, chart_type, img_path)
+                        generate_chart(filtered_df, x_col, y_col, chart_type, chart_title=chart_title, output_path=img_path)
                         context[var] = InlineImage(doc, img_path, width=Mm(120))
                 else:
                     # 舊格式
@@ -573,10 +577,11 @@ def render_word():
                     x_col = setting.get('x')
                     y_col = setting.get('y')
                     chart_type = setting.get('chartType')
+                    chart_title = setting.get('chartTitle')
                     if not x_col or not y_col or not chart_type:
                         continue
                     img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
-                    generate_chart(filtered_df, x_col, y_col, chart_type, img_path)
+                    generate_chart(filtered_df, x_col, y_col, chart_type, chart_title=chart_title, output_path=img_path)
                     context[var] = InlineImage(doc, img_path, width=Mm(120))
             else:
                 expr = setting
@@ -592,10 +597,11 @@ def render_word():
 
     doc.render(context)
 
-    output_path = os.path.join(GENERATED_FOLDER, 'final_report.docx')
+    # output_path = os.path.join(GENERATED_FOLDER, 'final_report.docx')
+    output_path = os.path.join(GENERATED_FOLDER, filename)
     doc.save(output_path)
 
-    return send_file(output_path, as_attachment=True)
+    return send_file(output_path, as_attachment=True, download_name=filename)
 
 @app.route('/save_settings', methods=['POST'])
 def save_settings():
@@ -666,6 +672,7 @@ def regenerate_chart():
     x_col = content.get('x')
     y_col = content.get('y')
     chart_type = content.get('chartType')
+    chart_title = content.get('chartTitle')
     data = content.get('data')
     dpi_scale = content.get('dpi', 2)  # 🔥 預設 dpi_scale 2
 
@@ -679,7 +686,7 @@ def regenerate_chart():
 
     try:
         save_path = os.path.join('generated', f'{var_name}.png')
-        generate_chart(df, x_col, y_col, chart_type, save_path, dpi_scale=dpi_scale)  # 🔥 使用上面的 generate_chart
+        generate_chart(df, x_col, y_col, chart_type, save_path, chart_title=chart_title, dpi_scale=dpi_scale)  # 🔥 使用上面的 generate_chart
         return jsonify({'message': '重新產生完成'})
     except Exception as e:
         return jsonify({'error': str(e)})
