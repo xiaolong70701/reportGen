@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,366 +13,372 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<!-- 導航條 -->
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
-      <i class="bi bi-file-earmark-word me-2"></i>
-      <span>Word 報表生成器</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="{{ url_for('home') }}">首頁</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('index') }}">上傳檔案</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- 頂部橫幅 -->
-<section class="hero-section text-center">
-  <div class="container">
-    <h1 class="hero-title">自動化 Word 週報生成器</h1>
-    <p class="hero-subtitle">簡單 3 步驟，將您的 CSV 資料轉換為專業的 Word 報告。無需撰寫程式碼，快速提高工作效率。</p>
-    <div class="d-flex justify-content-center gap-3">
-      <a href="{{ url_for('index') }}" class="btn cta-button">
-        <i class="bi bi-rocket me-2"></i>開始使用
+  <!-- 導航條 -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+        <i class="bi bi-file-earmark-word me-2"></i>
+        <span>Word 報表生成器</span>
       </a>
-      <a href="#features" class="btn cta-button-secondary">
-        <i class="bi bi-info-circle me-2"></i>了解更多
-      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('home') }}">首頁</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">上傳檔案</a>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-</section>
+  </nav>
 
-<!-- 功能介紹 -->
-<section id="features" class="container mb-5">
-  <h2 class="text-center mb-5 fw-bold">主要功能</h2>
-  
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-upload"></i>
-        </div>
-        <h3 class="feature-title">簡單上傳</h3>
-        <p class="feature-text">只需上傳 Word 模板和 CSV 資料，系統即可自動分析並準備報告生成環境。</p>
+  <section class="hero-section text-center">
+    <div class="container">
+      <h1 class="hero-title">自動化 Word 週報生成器</h1>
+      <p class="hero-subtitle">簡單 3 步驟，將您的 CSV 資料轉換為專業的 Word 報告。無需撰寫程式碼，快速提高工作效率。</p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('index') }}" class="btn cta-button">
+          <i class="bi bi-rocket me-2"></i>開始使用
+        </a>
+        <a href="#features" class="btn cta-button-secondary">
+          <i class="bi bi-info-circle me-2"></i>了解更多
+        </a>
       </div>
     </div>
-    
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-calculator"></i>
-        </div>
-        <h3 class="feature-title">智能計算</h3>
-        <p class="feature-text">支援多種數據統計函數，如 SUM、MEAN、MAX、MIN 等，滿足各種報表計算需求。</p>
-      </div>
-    </div>
-    
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-file-earmark-word"></i>
-        </div>
-        <h3 class="feature-title">一鍵生成</h3>
-        <p class="feature-text">設定完成後，只需點擊一鍵即可生成格式精美的 Word 報告，節省大量手動操作時間。</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="row g-4 mt-2">
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-calendar-date"></i>
-        </div>
-        <h3 class="feature-title">日期篩選</h3>
-        <p class="feature-text">內建智能日期識別和篩選功能，輕鬆處理時間序列數據，生成特定時間範圍的報告。</p>
-      </div>
-    </div>
-    
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-gear"></i>
-        </div>
-        <h3 class="feature-title">保存設定</h3>
-        <p class="feature-text">可保存公式設定以供下次使用，大幅減少重複工作，提高工作效率。</p>
-      </div>
-    </div>
-    
-    <div class="col-md-4">
-      <div class="feature-card p-4 text-center">
-        <div class="feature-icon">
-          <i class="bi bi-eye"></i>
-        </div>
-        <h3 class="feature-title">即時預覽</h3>
-        <p class="feature-text">設定公式後可即時預覽結果，確保報告內容準確無誤，避免錯誤產出。</p>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- 使用步驟 -->
-<section class="container mb-5">
-  <h2 class="text-center mb-5 fw-bold">使用步驟</h2>
-  
-  <div class="row">
-    <div class="col-lg-10 mx-auto">
-      <div class="bg-white p-4 rounded-4 shadow-sm">
-        <div class="row align-items-center mb-4 g-4">
-          <div class="col-md-2 text-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 70px; height: 70px;">
-              <h3 class="mb-0">1</h3>
-            </div>
+  <section id="features" class="container mb-5">
+    <h2 class="text-center mb-5 fw-bold">主要功能</h2>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-upload"></i>
           </div>
-          <div class="col-md-10">
-            <h4>上傳文件</h4>
-            <p class="mb-0 text-muted">上傳您的 Word 模板和 CSV 數據文件。Word 模板中使用 <code>&#123;&#123; 變數名稱 &#125;&#125;</code> 格式標記變數，系統會自動分析並準備替換。</p>
-          </div>
+          <h3 class="feature-title">簡單上傳</h3>
+          <p class="feature-text">只需上傳 Word 模板和 CSV 資料，系統即可自動分析並準備報告生成環境。</p>
         </div>
-        
-        <div class="row align-items-center mb-4 g-4">
-          <div class="col-md-2 text-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 70px; height: 70px;">
-              <h3 class="mb-0">2</h3>
-            </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-calculator"></i>
           </div>
-          <div class="col-md-10">
-            <h4>設定公式</h4>
-            <p class="mb-0 text-muted">為每個變數設定計算公式，系統支援多種函數，如 <code>SUM</code>、<code>MEAN</code>、<code>MAX</code> 等。您還可以使用日期篩選功能，選擇特定時間範圍的數據。</p>
-          </div>
+          <h3 class="feature-title">智能計算</h3>
+          <p class="feature-text">支援多種數據統計函數，如 SUM、MEAN、MAX、MIN 等，滿足各種報表計算需求。</p>
         </div>
-        
-        <div class="row align-items-center g-4">
-          <div class="col-md-2 text-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 70px; height: 70px;">
-              <h3 class="mb-0">3</h3>
-            </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-file-earmark-word"></i>
           </div>
-          <div class="col-md-10">
-            <h4>生成報告</h4>
-            <p class="mb-0 text-muted">預覽確認無誤後，點擊「產生 Word 報告」按鈕，系統將自動生成並下載 Word 文件；還可以保存公式計算與圖表繪製設定，以便下次使用。</p>
-          </div>
+          <h3 class="feature-title">一鍵生成</h3>
+          <p class="feature-text">設定完成後，只需點擊一鍵即可生成格式精美的 Word 報告，節省大量手動操作時間。</p>
         </div>
       </div>
     </div>
-  </div>
-  
-  <div class="text-center mt-5">
-    <a href="{{ url_for('index') }}" class="btn cta-button">
-      <i class="bi bi-rocket me-2"></i>立即開始使用
-    </a>
-  </div>
-</section>
 
-<!-- 聯絡我們 -->
-<section id="contact" class="container mb-5">
-  <div id="contact-form-wrapper">
-    <h2 class="text-center mb-5 fw-bold">聯絡我們</h2>
+    <div class="row g-4 mt-2">
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-calendar-date"></i>
+          </div>
+          <h3 class="feature-title">日期篩選</h3>
+          <p class="feature-text">內建智能日期識別和篩選功能，輕鬆處理時間序列數據，生成特定時間範圍的報告。</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-gear"></i>
+          </div>
+          <h3 class="feature-title">保存設定</h3>
+          <p class="feature-text">可保存公式設定以供下次使用，大幅減少重複工作，提高工作效率。</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 text-center">
+          <div class="feature-icon">
+            <i class="bi bi-eye"></i>
+          </div>
+          <h3 class="feature-title">即時預覽</h3>
+          <p class="feature-text">設定公式後可即時預覽結果，確保報告內容準確無誤，避免錯誤產出。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 使用步驟 -->
+  <section class="container mb-5">
+    <h2 class="text-center mb-5 fw-bold">使用步驟</h2>
+
     <div class="row">
-      <div class="col-lg-8 mx-auto">
+      <div class="col-lg-10 mx-auto">
         <div class="bg-white p-4 rounded-4 shadow-sm">
-          <p class="text-center mb-4">如有任何問題或建議，請填寫以下表單與我們聯繫</p>
-
-          <form id="contact-form" method="POST" action="{{ url_for('contact') }}">
-            <div class="mb-3">
-              <label for="name" class="form-label">姓名</label>
-              <input type="text" class="form-control" id="name" name="name" placeholder="請輸入您的姓名">
+          <div class="row align-items-center mb-4 g-4">
+            <div class="col-md-2 text-center">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                style="width: 70px; height: 70px;">
+                <h3 class="mb-0">1</h3>
+              </div>
             </div>
-
-            <div class="mb-3">
-              <label for="email" class="form-label">電子郵件</label>
-              <input type="email" class="form-control" id="email" name="email" placeholder="請輸入您的電子郵件">
+            <div class="col-md-10">
+              <h4>上傳文件</h4>
+              <p class="mb-0 text-muted">上傳您的 Word 模板和 CSV 數據文件。Word 模板中使用 <code>&#123;&#123; 變數名稱 &#125;&#125;</code>
+                格式標記變數，系統會自動分析並準備替換。</p>
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label for="message" class="form-label">訊息</label>
-              <textarea class="form-control" id="message" name="message" rows="5" placeholder="請輸入您的訊息"></textarea>
+          <div class="row align-items-center mb-4 g-4">
+            <div class="col-md-2 text-center">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                style="width: 70px; height: 70px;">
+                <h3 class="mb-0">2</h3>
+              </div>
             </div>
+            <div class="col-md-10">
+              <h4>設定公式</h4>
+              <p class="mb-0 text-muted">為每個變數設定計算公式，系統支援多種函數，如 <code>SUM</code>、<code>MEAN</code>、<code>MAX</code>
+                等。您還可以使用日期篩選功能，選擇特定時間範圍的數據。</p>
+            </div>
+          </div>
 
-            <div class="d-grid">
-              <button type="submit" id="submit-button" class="btn cta-button">
-                <i class="bi bi-send me-2"></i>送出訊息
-              </button>              
+          <div class="row align-items-center g-4">
+            <div class="col-md-2 text-center">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                style="width: 70px; height: 70px;">
+                <h3 class="mb-0">3</h3>
+              </div>
             </div>
-          </form>
+            <div class="col-md-10">
+              <h4>生成報告</h4>
+              <p class="mb-0 text-muted">預覽確認無誤後，點擊「產生 Word 報告」按鈕，系統將自動生成並下載 Word 文件；還可以保存公式計算與圖表繪製設定，以便下次使用。</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="contact-success-message" style="display:none;" class="text-center mt-4">
-    <h4 class="fw-bold">
-      <i class="bi bi-check-circle me-2"></i>感謝您的聯絡！我們已收到您的訊息！
-    </h4>
-  </div>  
-</section>
+    <div class="text-center mt-5">
+      <a href="{{ url_for('index') }}" class="btn cta-button">
+        <i class="bi bi-rocket me-2"></i>立即開始使用
+      </a>
+    </div>
+  </section>
 
-<!-- 頁腳 -->
-<footer class="footer">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-4 mb-4 mb-md-0">
-        <h5 class="mb-4 fw-bold">Word 報表生成器</h5>
-        <p class="text-muted">簡單高效的自動化報表解決方案，幫助您輕鬆轉換數據為專業 Word 報告。</p>
-        <div class="social-icons">
-          <a href="#"><i class="bi bi-facebook"></i></a>
-          <a href="#"><i class="bi bi-twitter"></i></a>
-          <a href="#"><i class="bi bi-linkedin"></i></a>
-          <a href="https://github.com/xiaolong70701/reportGen"><i class="bi bi-github"></i></a>
+  <!-- 聯絡我們 -->
+  <section id="contact" class="container mb-5">
+    <div id="contact-form-wrapper">
+      <h2 class="text-center mb-5 fw-bold">聯絡我們</h2>
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <div class="bg-white p-4 rounded-4 shadow-sm">
+            <p class="text-center mb-4">如有任何問題或建議，請填寫以下表單與我們聯繫</p>
+
+            <form id="contact-form" method="POST" action="{{ url_for('contact') }}">
+              <div class="mb-3">
+                <label for="name" class="form-label">姓名</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="請輸入您的姓名">
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">電子郵件</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="請輸入您的電子郵件">
+              </div>
+
+              <div class="mb-3">
+                <label for="message" class="form-label">訊息</label>
+                <textarea class="form-control" id="message" name="message" rows="5" placeholder="請輸入您的訊息"></textarea>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" id="submit-button" class="btn cta-button">
+                  <i class="bi bi-send me-2"></i>送出訊息
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-      
-      <div class="col-md-2 mb-4 mb-md-0">
-        <h6 class="mb-4 fw-bold">快速連結</h6>
-        <ul class="footer-links">
-          <li><a href="{{ url_for('home') }}">首頁</a></li>
-          <li><a href="{{ url_for('index') }}">上傳檔案</a></li>
-          <li><a href="#features">功能介紹</a></li>
-          <li><a href="#contact">聯絡我們</a></li>
-        </ul>
+    </div>
+
+    <div id="contact-success-message" style="display:none;" class="text-center mt-4">
+      <h4 class="fw-bold">
+        <i class="bi bi-check-circle me-2"></i>感謝您的聯絡！我們已收到您的訊息！
+      </h4>
+    </div>
+  </section>
+
+  <!-- 頁腳 -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h5 class="mb-4 fw-bold">Word 報表生成器</h5>
+          <p class="text-muted">簡單高效的自動化報表解決方案，幫助您輕鬆轉換數據為專業 Word 報告。</p>
+          <div class="social-icons">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-twitter"></i></a>
+            <a href="#"><i class="bi bi-linkedin"></i></a>
+            <a href="https://github.com/xiaolong70701/reportGen"><i class="bi bi-github"></i></a>
+          </div>
+        </div>
+
+        <div class="col-md-2 mb-4 mb-md-0">
+          <h6 class="mb-4 fw-bold">快速連結</h6>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('home') }}">首頁</a></li>
+            <li><a href="{{ url_for('index') }}">上傳檔案</a></li>
+            <li><a href="#features">功能介紹</a></li>
+            <li><a href="#contact">聯絡我們</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-3 mb-4 mb-md-0">
+          <h6 class="mb-4 fw-bold">相關資源</h6>
+          <ul class="footer-links">
+            <li><a href="#">使用說明</a></li>
+            <li><a href="#">範例模板</a></li>
+            <li><a href="#">常見問題</a></li>
+            <li><a href="#">更新日誌</a></li>
+          </ul>
+        </div>
+
+        <div class="col-md-3">
+          <h6 class="mb-4 fw-bold">聯絡資訊</h6>
+          <ul class="footer-links">
+            <li><i class="bi bi-envelope me-2"></i> xiaolong70701@gmail.com</li>
+            <li><i class="bi bi-telephone me-2"></i> (+886) 0933-835-537</li>
+            <li><i class="bi bi-geo-alt me-2"></i> 臺北市文山區指南路二段 64 號</li>
+          </ul>
+        </div>
       </div>
-      
-      <div class="col-md-3 mb-4 mb-md-0">
-        <h6 class="mb-4 fw-bold">相關資源</h6>
-        <ul class="footer-links">
-          <li><a href="#">使用說明</a></li>
-          <li><a href="#">範例模板</a></li>
-          <li><a href="#">常見問題</a></li>
-          <li><a href="#">更新日誌</a></li>
-        </ul>
-      </div>
-      
-      <div class="col-md-3">
-        <h6 class="mb-4 fw-bold">聯絡資訊</h6>
-        <ul class="footer-links">
-          <li><i class="bi bi-envelope me-2"></i> xiaolong70701@gmail.com</li>
-          <li><i class="bi bi-telephone me-2"></i> (+886) 0933-835-537</li>
-          <li><i class="bi bi-geo-alt me-2"></i> 臺北市文山區指南路二段 64 號</li>
-        </ul>
+
+      <hr>
+
+      <div class="text-center footer-text">
+        <p class="mb-0">&copy; 2025 Word 報表生成器</p>
       </div>
     </div>
-    
-    <hr>
-    
-    <div class="text-center footer-text">
-      <p class="mb-0">&copy; 2025 Word 報表生成器</p>
-    </div>
-  </div>
-</footer>
+  </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // 平滑滾動效果
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      
-      const targetId = this.getAttribute('href');
-      if (targetId === '#') return;
-      
-      const targetElement = document.querySelector(targetId);
-      if (targetElement) {
-        window.scrollTo({
-          top: targetElement.offsetTop - 70,
-          behavior: 'smooth'
-        });
-      }
-    });
-  });
-  
-  // 導航欄滾動效果
-  window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-      navbar.classList.add('shadow');
-    } else {
-      navbar.classList.remove('shadow');
-    }
-  });
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 平滑滾動效果
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
 
-  document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('contact-form');
-  const contactFormWrapper = document.getElementById('contact-form-wrapper');
-  const successMessage = document.getElementById('contact-success-message');
-  const submitButton = document.getElementById('submit-button');
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
 
-  if (form) {
-    form.addEventListener('submit', function(event) {
-      event.preventDefault(); // 阻止原本送出後刷新
-
-      const formData = new FormData(form);
-
-      // ✨ 送出前：按鈕變「送出中...」且 disable
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>送出中...';
-      }
-
-      fetch('{{ url_for("contact") }}', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => {
-        if (response.ok) {
-          // 送出成功：表單淡出
-          if (contactFormWrapper) {
-            contactFormWrapper.style.transition = "opacity 0.6s ease";
-            contactFormWrapper.style.opacity = "0";
-            setTimeout(() => {
-              contactFormWrapper.style.display = "none";
-
-              // 顯示感謝訊息
-              if (successMessage) {
-                successMessage.style.opacity = "0";
-                successMessage.style.display = "block";
-                setTimeout(() => {
-                  successMessage.style.transition = "opacity 0.8s ease";
-                  successMessage.style.opacity = "1";
-                }, 10);
-
-                // 1秒後自動隱藏感謝訊息
-                setTimeout(() => {
-                  successMessage.style.transition = "opacity 0.8s ease";
-                  successMessage.style.opacity = "0";
-                  setTimeout(() => {
-                    successMessage.style.display = "none";
-                  }, 800); // 淡出後完全隱藏
-                }, 1000); // 等待 1秒後開始淡出
-              }
-            }, 600);
-          }
-        } else {
-          // 如果送出失敗，要還原按鈕
-          alert('送出失敗，請稍後再試');
-          if (submitButton) {
-            submitButton.disabled = false;
-            submitButton.innerHTML = '<i class="bi bi-send me-2"></i>送出訊息';
-          }
-        }
-      })
-      .catch(error => {
-        console.error('錯誤:', error);
-        alert('送出失敗，請稍後再試');
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.innerHTML = '<i class="bi bi-send me-2"></i>送出訊息';
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 70,
+            behavior: 'smooth'
+          });
         }
       });
     });
-  }
-});
-</script>
+
+    // 導航欄滾動效果
+    window.addEventListener('scroll', function () {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 100) {
+        navbar.classList.add('shadow');
+      } else {
+        navbar.classList.remove('shadow');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('contact-form');
+      const contactFormWrapper = document.getElementById('contact-form-wrapper');
+      const successMessage = document.getElementById('contact-success-message');
+      const submitButton = document.getElementById('submit-button');
+
+      if (form) {
+        form.addEventListener('submit', function (event) {
+          event.preventDefault(); // 阻止原本送出後刷新
+
+          const formData = new FormData(form);
+
+          // ✨ 送出前：按鈕變「送出中...」且 disable
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>送出中...';
+          }
+
+          fetch('{{ url_for("contact") }}', {
+            method: 'POST',
+            body: formData
+          })
+            .then(response => {
+              if (response.ok) {
+                // 送出成功：表單淡出
+                if (contactFormWrapper) {
+                  contactFormWrapper.style.transition = "opacity 0.6s ease";
+                  contactFormWrapper.style.opacity = "0";
+                  setTimeout(() => {
+                    contactFormWrapper.style.display = "none";
+
+                    // 顯示感謝訊息
+                    if (successMessage) {
+                      successMessage.style.opacity = "0";
+                      successMessage.style.display = "block";
+                      setTimeout(() => {
+                        successMessage.style.transition = "opacity 0.8s ease";
+                        successMessage.style.opacity = "1";
+                      }, 10);
+
+                      // 1秒後自動隱藏感謝訊息
+                      setTimeout(() => {
+                        successMessage.style.transition = "opacity 0.8s ease";
+                        successMessage.style.opacity = "0";
+                        setTimeout(() => {
+                          successMessage.style.display = "none";
+                        }, 800); // 淡出後完全隱藏
+                      }, 1000); // 等待 1秒後開始淡出
+                    }
+                  }, 600);
+                }
+              } else {
+                // 如果送出失敗，要還原按鈕
+                alert('送出失敗，請稍後再試');
+                if (submitButton) {
+                  submitButton.disabled = false;
+                  submitButton.innerHTML = '<i class="bi bi-send me-2"></i>送出訊息';
+                }
+              }
+            })
+            .catch(error => {
+              console.error('錯誤:', error);
+              alert('送出失敗，請稍後再試');
+              if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="bi bi-send me-2"></i>送出訊息';
+              }
+            });
+        });
+      }
+    });
+  </script>
 </body>
+
 </html>

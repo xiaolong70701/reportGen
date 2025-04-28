@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,14 +23,14 @@
             --text-color: #2D3748;
             --light-text: #718096;
         }
-        
+
         body {
             background-color: var(--light-bg);
             color: var(--text-color);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
         }
-        
+
         .page-header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
@@ -40,29 +41,29 @@
         }
 
         .navbar {
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background-color: white;
         }
 
         .navbar-brand {
-        font-weight: 700;
-        color: var(--primary-color);
+            font-weight: 700;
+            color: var(--primary-color);
         }
 
         .nav-link {
-        font-weight: 500;
-        color: var(--dark-text);
-        transition: color 0.3s;
+            font-weight: 500;
+            color: var(--dark-text);
+            transition: color 0.3s;
         }
 
         .nav-link:hover {
-        color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .nav-link.active {
-        color: var(--primary-color);
+            color: var(--primary-color);
         }
-        
+
         .card {
             border: none;
             border-radius: 16px;
@@ -71,18 +72,18 @@
             overflow: hidden;
             margin-bottom: 2rem;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card-header {
             background-color: white;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1.5rem;
         }
-        
+
         .card-title {
             font-weight: 700;
             margin-bottom: 0;
@@ -90,22 +91,22 @@
             align-items: center;
             color: var(--text-color);
         }
-        
+
         .card-title i {
             margin-right: 0.75rem;
             color: var(--primary-color);
         }
-        
+
         .card-body {
             padding: 1.5rem;
         }
-        
+
         .form-label {
             font-weight: 600;
             color: var(--text-color);
             margin-bottom: 0.5rem;
         }
-        
+
         .form-control {
             border-radius: 10px;
             border: 1px solid #E2E8F0;
@@ -113,65 +114,65 @@
             font-size: 1rem;
             transition: all 0.3s;
         }
-        
+
         .form-control:focus {
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
             border-color: var(--primary-color);
         }
-        
+
         input[type="date"] {
             cursor: pointer;
         }
-        
+
         .btn {
             border-radius: 10px;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             transition: all 0.3s;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
             box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, #28C76F, #24B263);
             border: none;
             box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
         }
-        
+
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
         }
-        
+
         .btn-outline-primary {
             border: 2px solid var(--primary-color);
             color: var(--primary-color);
         }
-        
+
         .btn-outline-primary:hover {
             background-color: var(--primary-color);
             color: white;
         }
-        
+
         .btn-outline-success {
             border: 2px solid var(--success-color);
             color: var(--success-color);
         }
-        
+
         .btn-outline-success:hover {
             background-color: var(--success-color);
             color: white;
         }
-        
+
         /* 預覽變數樣式 */
         .variable {
             background-color: rgba(67, 97, 238, 0.1);
@@ -186,7 +187,7 @@
             margin-right: auto;
             border: 1px solid rgba(67, 97, 238, 0.2);
         }
-        
+
         .variable.editable:hover {
             margin-left: auto;
             margin-right: auto;
@@ -194,13 +195,13 @@
             transform: translateY(-2px);
             box-shadow: 0 3px 8px rgba(67, 97, 238, 0.15);
         }
-        
+
         .variable.error {
             background-color: rgba(231, 76, 60, 0.1);
             color: var(--danger-color);
             border: 1px solid rgba(231, 76, 60, 0.2);
         }
-        
+
         /* 預覽結果容器 */
         #previewResult {
             background-color: white;
@@ -213,44 +214,44 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
             overflow: visible;
         }
-        
+
         /* Modal 樣式 */
         .modal-content {
             border-radius: 16px;
             border: none;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
         }
-        
+
         .modal-header {
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1.5rem;
         }
-        
+
         .modal-title {
             font-weight: 700;
             color: var(--text-color);
         }
-        
+
         .modal-body {
             padding: 1.5rem;
         }
-        
+
         .modal-footer {
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1.5rem;
         }
-        
+
         #formulaInput {
             font-family: 'Courier New', monospace;
             font-size: 1rem;
         }
-        
+
         .form-text {
             color: var(--light-text);
             margin-top: 0.5rem;
             font-size: 0.9rem;
         }
-        
+
         /* Loading 遮罩 */
         #loadingOverlay {
             position: fixed;
@@ -265,7 +266,7 @@
             justify-content: center;
             backdrop-filter: blur(5px);
         }
-        
+
         .loading-content {
             text-align: center;
             background-color: white;
@@ -273,19 +274,19 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
-        
+
         .spinner-border {
             width: 3.5rem;
             height: 3.5rem;
             color: var(--primary-color);
         }
-        
+
         .loading-text {
             font-weight: 600;
             margin-top: 1rem;
             color: var(--text-color);
         }
-        
+
         /* 功能按鈕區 */
         .action-buttons {
             display: flex;
@@ -293,24 +294,24 @@
             gap: 1rem;
             margin: 2rem 0;
         }
-        
+
         .action-buttons .btn {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         /* 響應式調整 */
         @media (max-width: 768px) {
             .card-body {
                 padding: 1.25rem;
             }
-            
+
             #previewResult {
                 padding: 1.25rem;
                 font-size: 1rem;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
@@ -320,14 +321,15 @@
                 max-width: calc(100% + 40px);
                 padding: 15px;
             }
-            
+
             .chart-image-container {
                 height: 350px !important;
             }
         }
-        
+
         .chart-container {
-            margin: 15px -50px; /* 負邊距使容器變寬 */
+            margin: 15px -50px;
+            /* 負邊距使容器變寬 */
             background-color: #f8f9fa;
             border-radius: 12px;
             padding: 20px;
@@ -358,7 +360,7 @@
         .chart-preview-toggle:hover {
             transform: translateY(-2px);
         }
-        
+
         .chart-preview {
             padding: 10px;
             border-radius: 10px;
@@ -372,6 +374,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -380,7 +383,8 @@
 
         .chart-image-container {
             width: 100%;
-            height: 400px !important; /* 增加圖表高度 */
+            height: 400px !important;
+            /* 增加圖表高度 */
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             overflow: hidden;
@@ -413,271 +417,276 @@
         }
     </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
-<div class="container">
-    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
-    <i class="bi bi-file-earmark-word me-2"></i>
-    <span>Word 報表生成器</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-        <a class="nav-link active" href="{{ url_for('home') }}">首頁</a>
-        </li>
-        <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('index') }}">上傳檔案</a>
-        </li>
-    </ul>
-    </div>
-</div>
-</nav>
-
-<div class="container py-5">
-
-    <!-- 頁面標題 -->
-    <div class="page-header text-center">
-        <h1 class="fw-bold"><i class="bi bi-file-earmark-text"></i> 預覽並設定公式</h1>
-        <p class="text-white-50 mt-2 mb-0">您可以在此處設定變數公式，並預覽最終文件</p>
-    </div>
-
-    <!-- 日期篩選 -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title"><i class="bi bi-calendar-event"></i> 資料篩選</h5>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+                <i class="bi bi-file-earmark-word me-2"></i>
+                <span>Word 報表生成器</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('home') }}">首頁</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">上傳檔案</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">依據 <span class="badge bg-primary">{{ date_column }}</span> 欄位篩選資料</p>
+    </nav>
 
-            <form id="filterForm" class="row g-3 align-items-center">
-                <div class="col-md-6">
-                    <label for="startDate" class="form-label">起始日期</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="bi bi-calendar-minus"></i></span>
-                        <input type="date" id="startDate" class="form-control" value="{{ date_min }}">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label for="endDate" class="form-label">結束日期</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="bi bi-calendar-plus"></i></span>
-                        <input type="date" id="endDate" class="form-control" value="{{ date_max }}">
-                    </div>
-                </div>
-                <div class="col-12 d-grid mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-funnel-fill me-2"></i>套用篩選條件
-                    </button>
-                </div>
-            </form>
+    <div class="container py-5">
+
+        <!-- 頁面標題 -->
+        <div class="page-header text-center">
+            <h1 class="fw-bold"><i class="bi bi-file-earmark-text"></i> 預覽並設定公式</h1>
+            <p class="text-white-50 mt-2 mb-0">您可以在此處設定變數公式，並預覽最終文件</p>
         </div>
-    </div>
 
-    <!-- 預覽區 -->
-    <div id="generateSection" style="display: none;">
+        <!-- 日期篩選 -->
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title"><i class="bi bi-file-text"></i> 銷售週報預覽</h5>
+                <h5 class="card-title"><i class="bi bi-calendar-event"></i> 資料篩選</h5>
             </div>
             <div class="card-body">
-                <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    <div>點擊藍色變數區域可以設定或修改計算公式</div>
-                </div>
-                
-                <div id="previewResult" class="mb-4">
-                    {{ html_content|safe }}
-                </div>
+                <p class="text-muted mb-3">依據 <span class="badge bg-primary">{{ date_column }}</span> 欄位篩選資料</p>
 
-                <!-- 儲存/載入設定按鈕 -->
-                <div class="action-buttons">
-                    <button type="button" id="saveSettingsBtn" class="btn btn-outline-primary">
-                        <i class="bi bi-save"></i> 儲存公式設定
-                    </button>
-                    <button type="button" id="loadSettingsBtn" class="btn btn-outline-success">
-                        <i class="bi bi-folder2-open"></i> 載入公式設定
-                    </button>
-                </div>
-
-                <!-- 產生 Word -->
-                <div class="mb-3">
-                    <label for="docxFileName" class="form-label">Word 檔案名稱</label>
-                    <input type="text" id="docxFileName" class="form-control" placeholder="例如：2025年4月週報.docx" value="weekly_report.docx">
-                </div>
-
-                <form id="generateForm" class="d-grid">
-                    <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-file-earmark-word me-2"></i> 產生 Word 報告
-                    </button>
+                <form id="filterForm" class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <label for="startDate" class="form-label">起始日期</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-calendar-minus"></i></span>
+                            <input type="date" id="startDate" class="form-control" value="{{ date_min }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="endDate" class="form-label">結束日期</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-calendar-plus"></i></span>
+                            <input type="date" id="endDate" class="form-control" value="{{ date_max }}">
+                        </div>
+                    </div>
+                    <div class="col-12 d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel-fill me-2"></i>套用篩選條件
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
+
+        <!-- 預覽區 -->
+        <div id="generateSection" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="bi bi-file-text"></i> 銷售週報預覽</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>點擊藍色變數區域可以設定或修改計算公式</div>
+                    </div>
+
+                    <div id="previewResult" class="mb-4">
+                        {{ html_content|safe }}
+                    </div>
+
+                    <!-- 儲存/載入設定按鈕 -->
+                    <div class="action-buttons">
+                        <button type="button" id="saveSettingsBtn" class="btn btn-outline-primary">
+                            <i class="bi bi-save"></i> 儲存公式設定
+                        </button>
+                        <button type="button" id="loadSettingsBtn" class="btn btn-outline-success">
+                            <i class="bi bi-folder2-open"></i> 載入公式設定
+                        </button>
+                    </div>
+
+                    <!-- 產生 Word -->
+                    <div class="mb-3">
+                        <label for="docxFileName" class="form-label">Word 檔案名稱</label>
+                        <input type="text" id="docxFileName" class="form-control" placeholder="例如：2025年4月週報.docx"
+                            value="weekly_report.docx">
+                    </div>
+
+                    <form id="generateForm" class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-file-earmark-word me-2"></i> 產生 Word 報告
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-</div>
-
-<!-- Loading 遮罩 -->
-<div id="loadingOverlay" style="display:none;">
-    <div class="loading-content">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <!-- Loading 遮罩 -->
+    <div id="loadingOverlay" style="display:none;">
+        <div class="loading-content">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="loading-text">處理中，請稍候...</div>
         </div>
-        <div class="loading-text">處理中，請稍候...</div>
     </div>
-</div>
 
-<!-- 公式設定 Modal -->
-<!-- 公式設定 Modal -->
-<div class="modal fade" id="formulaModal" tabindex="-1" aria-labelledby="formulaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="formulaModalLabel">
-            <i class="bi bi-calculator me-2"></i>設定變數公式 / 圖表
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+    <!-- 公式設定 Modal -->
+    <!-- 公式設定 Modal -->
+    <div class="modal fade" id="formulaModal" tabindex="-1" aria-labelledby="formulaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="formulaModalLabel">
+                        <i class="bi bi-calculator me-2"></i>設定變數公式 / 圖表
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- 變數名稱 -->
+                    <div class="mb-4">
+                        <label for="variableName" class="form-label">變數名稱</label>
+                        <input type="text" id="variableName" class="form-control" readonly>
+                    </div>
+
+                    <!-- 變數類型選擇 -->
+                    <div class="mb-4">
+                        <label class="form-label">變數類型</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="variableType" id="typeFormula"
+                                value="formula" checked>
+                            <label class="form-check-label" for="typeFormula">
+                                數字公式
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="variableType" id="typeChart"
+                                value="chart">
+                            <label class="form-check-label" for="typeChart">
+                                圖表
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 數字公式區 -->
+                    <div id="formulaFields">
+                        <div class="mb-4">
+                            <label for="formulaInput" class="form-label">公式</label>
+                            <input type="text" id="formulaInput" class="form-control" placeholder="例如 SUM(price)">
+                            <div class="form-text">
+                                支援函數：SUM, MEAN, MAX, MIN, COUNT, MEDIAN, STD, VAR, PERCENT_CHANGE, DIFF, CAGR
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 圖表設定區 -->
+                    <div id="chartFields" style="display: none;">
+                        <div class="mb-4">
+                            <label for="xAxisSelect" class="form-label">X 軸欄位</label>
+                            <select id="xAxisSelect" class="form-select">
+                                <!-- 這裡用 JavaScript 動態填 -->
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="yAxisSelect" class="form-label">Y 軸欄位</label>
+                            <select id="yAxisSelect" class="form-select">
+                                <!-- 這裡用 JavaScript 動態填 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickEditChartTitle" class="form-label">圖表標題</label>
+                            <input type="text" id="chartTitleInput" class="form-control" placeholder="請輸入圖表標題">
+                        </div>
+                        <div class="mb-4">
+                            <label for="chartTypeSelect" class="form-label">圖表類型</label>
+                            <select id="chartTypeSelect" class="form-select">
+                                <option value="line">折線圖（Line）</option>
+                                <option value="bar">長條圖（Bar）</option>
+                                <option value="hist">直方圖（Histogram）</option>
+                                <option value="pie">圓餅圖（Pie）</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 儲存按鈕 -->
+                    <div class="d-grid">
+                        <button type="button" id="saveFormulaBtn" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>儲存設定
+                        </button>
+                    </div>
+
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          
-          <!-- 變數名稱 -->
-          <div class="mb-4">
-            <label for="variableName" class="form-label">變數名稱</label>
-            <input type="text" id="variableName" class="form-control" readonly>
-          </div>
-  
-          <!-- 變數類型選擇 -->
-          <div class="mb-4">
-            <label class="form-label">變數類型</label>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="variableType" id="typeFormula" value="formula" checked>
-              <label class="form-check-label" for="typeFormula">
-                數字公式
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="variableType" id="typeChart" value="chart">
-              <label class="form-check-label" for="typeChart">
-                圖表
-              </label>
-            </div>
-          </div>
-  
-          <!-- 數字公式區 -->
-          <div id="formulaFields">
-            <div class="mb-4">
-              <label for="formulaInput" class="form-label">公式</label>
-              <input type="text" id="formulaInput" class="form-control" placeholder="例如 SUM(price)">
-              <div class="form-text">
-                支援函數：SUM, MEAN, MAX, MIN, COUNT, MEDIAN, STD, VAR, PERCENT_CHANGE, DIFF, CAGR
-              </div>
-            </div>
-          </div>
-  
-          <!-- 圖表設定區 -->
-          <div id="chartFields" style="display: none;">
-            <div class="mb-4">
-              <label for="xAxisSelect" class="form-label">X 軸欄位</label>
-              <select id="xAxisSelect" class="form-select">
-                <!-- 這裡用 JavaScript 動態填 -->
-              </select>
-            </div>
-            <div class="mb-4">
-              <label for="yAxisSelect" class="form-label">Y 軸欄位</label>
-              <select id="yAxisSelect" class="form-select">
-                <!-- 這裡用 JavaScript 動態填 -->
-              </select>
-            </div>
-            <div class="mb-3">
-                <label for="quickEditChartTitle" class="form-label">圖表標題</label>
-                <input type="text" id="chartTitleInput" class="form-control" placeholder="請輸入圖表標題">
-            </div>                          
-            <div class="mb-4">
-              <label for="chartTypeSelect" class="form-label">圖表類型</label>
-              <select id="chartTypeSelect" class="form-select">
-                <option value="line">折線圖（Line）</option>
-                <option value="bar">長條圖（Bar）</option>
-                <option value="hist">直方圖（Histogram）</option>
-                <option value="pie">圓餅圖（Pie）</option>
-              </select>
-            </div>
-          </div>
-  
-          <!-- 儲存按鈕 -->
-          <div class="d-grid">
-            <button type="button" id="saveFormulaBtn" class="btn btn-primary">
-              <i class="bi bi-check-lg me-2"></i>儲存設定
-            </button>
-          </div>
-  
-        </div>
-      </div>
     </div>
-  </div>
-  
 
-<!-- 引入 js -->
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<!-- 自動載入 settings.json -->
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-    // 顯示載入中效果
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    fetch('/load_settings')
-    .then(response => {
-        if (response.ok) return response.json();
-        throw new Error('找不到設定檔');
-    })
-    .then(data => {
-        if (data.formulas) {
-            window.formulas = data.formulas;
-            
-            // 顯示成功通知
-            showNotification('成功載入設定檔', 'success');
-            
-            setTimeout(() => {
-                document.getElementById('filterForm').dispatchEvent(new Event('submit'));
-            }, 300);
-        } else {
-            showNotification('設定檔格式錯誤', 'warning');
-        }
-    })
-    .catch(err => {
-        console.log('ℹ️ 無設定檔，跳過載入');
-    })
-    .finally(() => {
-        // 無論成功或失敗，都隱藏載入中效果
-        setTimeout(() => {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }, 500);
-    });
-    
-    // 啟用 Bootstrap 的提示功能
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
+    <!-- 引入 js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-// 通知函數
-function showNotification(message, type) {
-    // 建立通知元素
-    const notification = document.createElement('div');
-    notification.className = `toast align-items-center text-white bg-${type} border-0`;
-    notification.setAttribute('role', 'alert');
-    notification.setAttribute('aria-live', 'assertive');
-    notification.setAttribute('aria-atomic', 'true');
-    
-    // 建立通知內容
-    notification.innerHTML = `
+    <!-- 自動載入 settings.json -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            // 顯示載入中效果
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            fetch('/load_settings')
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('找不到設定檔');
+                })
+                .then(data => {
+                    if (data.formulas) {
+                        window.formulas = data.formulas;
+
+                        // 顯示成功通知
+                        showNotification('成功載入設定檔', 'success');
+
+                        setTimeout(() => {
+                            document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+                        }, 300);
+                    } else {
+                        showNotification('設定檔格式錯誤', 'warning');
+                    }
+                })
+                .catch(err => {
+                    console.log('ℹ️ 無設定檔，跳過載入');
+                })
+                .finally(() => {
+                    // 無論成功或失敗，都隱藏載入中效果
+                    setTimeout(() => {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    }, 500);
+                });
+
+            // 啟用 Bootstrap 的提示功能
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // 通知函數
+        function showNotification(message, type) {
+            // 建立通知元素
+            const notification = document.createElement('div');
+            notification.className = `toast align-items-center text-white bg-${type} border-0`;
+            notification.setAttribute('role', 'alert');
+            notification.setAttribute('aria-live', 'assertive');
+            notification.setAttribute('aria-atomic', 'true');
+
+            // 建立通知內容
+            notification.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
                 <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
@@ -686,197 +695,197 @@ function showNotification(message, type) {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="關閉"></button>
         </div>
     `;
-    
-    // 建立通知容器
-    let toastContainer = document.querySelector('.toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-        document.body.appendChild(toastContainer);
-    }
-    
-    // 添加通知到容器
-    toastContainer.appendChild(notification);
-    
-    // 顯示通知
-    const toast = new bootstrap.Toast(notification, {
-        delay: 3000
-    });
-    toast.show();
-}
 
-// 增強表單提交效果
-document.getElementById('filterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // 顯示載入中效果
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    // 模擬 AJAX 請求 (實際應用需要替換為真實 AJAX)
-    setTimeout(() => {
-        // 請求完成，顯示預覽區
-        document.getElementById('generateSection').style.display = 'block';
-        document.getElementById('loadingOverlay').style.display = 'none';
-        
-        // 平滑滾動到預覽區
-        document.getElementById('generateSection').scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
+            // 建立通知容器
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            // 添加通知到容器
+            toastContainer.appendChild(notification);
+
+            // 顯示通知
+            const toast = new bootstrap.Toast(notification, {
+                delay: 3000
+            });
+            toast.show();
+        }
+
+        // 增強表單提交效果
+        document.getElementById('filterForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // 顯示載入中效果
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // 模擬 AJAX 請求 (實際應用需要替換為真實 AJAX)
+            setTimeout(() => {
+                // 請求完成，顯示預覽區
+                document.getElementById('generateSection').style.display = 'block';
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                // 平滑滾動到預覽區
+                document.getElementById('generateSection').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // 增加變數點擊事件 (實際情況需替換)
+                const variables = document.querySelectorAll('.variable.editable');
+                variables.forEach(variable => {
+                    variable.addEventListener('click', function () {
+                        const varName = this.getAttribute('data-var');
+                        openFormulaModal(varName);
+                    });
+                });
+            }, 800); // 模擬載入時間
         });
-        
-        // 增加變數點擊事件 (實際情況需替換)
-        const variables = document.querySelectorAll('.variable.editable');
-        variables.forEach(variable => {
-            variable.addEventListener('click', function() {
-                const varName = this.getAttribute('data-var');
-                openFormulaModal(varName);
+
+        // 表單互動增強
+        document.querySelectorAll('input[type="date"]').forEach(input => {
+            input.addEventListener('change', function () {
+                const label = this.previousElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    label.classList.add('text-primary');
+                    setTimeout(() => {
+                        label.classList.remove('text-primary');
+                    }, 1000);
+                }
             });
         });
-    }, 800); // 模擬載入時間
-});
 
-// 表單互動增強
-document.querySelectorAll('input[type="date"]').forEach(input => {
-    input.addEventListener('change', function() {
-        const label = this.previousElementSibling;
-        if (label && label.tagName === 'LABEL') {
-            label.classList.add('text-primary');
-            setTimeout(() => {
-                label.classList.remove('text-primary');
-            }, 1000);
-        }
-    });
-});
+        // 打開公式設定 Modal
+        function openFormulaModal(varName) {
+            const modal = new bootstrap.Modal(document.getElementById('formulaModal'));
+            document.getElementById('variableName').value = varName;
 
-// 打開公式設定 Modal
-function openFormulaModal(varName) {
-    const modal = new bootstrap.Modal(document.getElementById('formulaModal'));
-    document.getElementById('variableName').value = varName;
-
-    if (window.formulas && window.formulas[varName]) {
-        const setting = window.formulas[varName];
-        if (typeof setting === 'object' && setting.type === 'chart') {
-            // 顯示圖表設定
-            document.getElementById('typeChart').checked = true;
-            document.getElementById('formulaFields').style.display = 'none';
-            document.getElementById('chartFields').style.display = 'block';
-        } else {
-            // 顯示公式設定
-            document.getElementById('typeFormula').checked = true;
-            document.getElementById('formulaFields').style.display = 'block';
-            document.getElementById('chartFields').style.display = 'none';
-            document.getElementById('formulaInput').value = typeof setting === 'string' ? setting : (setting.value || '');
-        }
-    } else {
-        // 預設顯示公式設定
-        document.getElementById('typeFormula').checked = true;
-        document.getElementById('formulaFields').style.display = 'block';
-        document.getElementById('chartFields').style.display = 'none';
-        document.getElementById('formulaInput').value = '';
-    }
-
-    // 🔥 新增！載入 CSV 欄位填入 X 軸與 Y 軸選單
-    fetch('/get_columns')
-        .then(response => response.json())
-        .then(data => {
-            const xAxisSelect = document.getElementById('xAxisSelect');
-            const yAxisSelect = document.getElementById('yAxisSelect');
-            xAxisSelect.innerHTML = '';
-            yAxisSelect.innerHTML = '';
-
-            if (data.columns && data.columns.length > 0) {
-                data.columns.forEach(col => {
-                    const xOption = document.createElement('option');
-                    xOption.value = col;
-                    xOption.textContent = col;
-                    xAxisSelect.appendChild(xOption);
-
-                    const yOption = document.createElement('option');
-                    yOption.value = col;
-                    yOption.textContent = col;
-                    yAxisSelect.appendChild(yOption);
-                });
+            if (window.formulas && window.formulas[varName]) {
+                const setting = window.formulas[varName];
+                if (typeof setting === 'object' && setting.type === 'chart') {
+                    // 顯示圖表設定
+                    document.getElementById('typeChart').checked = true;
+                    document.getElementById('formulaFields').style.display = 'none';
+                    document.getElementById('chartFields').style.display = 'block';
+                } else {
+                    // 顯示公式設定
+                    document.getElementById('typeFormula').checked = true;
+                    document.getElementById('formulaFields').style.display = 'block';
+                    document.getElementById('chartFields').style.display = 'none';
+                    document.getElementById('formulaInput').value = typeof setting === 'string' ? setting : (setting.value || '');
+                }
+            } else {
+                // 預設顯示公式設定
+                document.getElementById('typeFormula').checked = true;
+                document.getElementById('formulaFields').style.display = 'block';
+                document.getElementById('chartFields').style.display = 'none';
+                document.getElementById('formulaInput').value = '';
             }
+
+            // 🔥 新增！載入 CSV 欄位填入 X 軸與 Y 軸選單
+            fetch('/get_columns')
+                .then(response => response.json())
+                .then(data => {
+                    const xAxisSelect = document.getElementById('xAxisSelect');
+                    const yAxisSelect = document.getElementById('yAxisSelect');
+                    xAxisSelect.innerHTML = '';
+                    yAxisSelect.innerHTML = '';
+
+                    if (data.columns && data.columns.length > 0) {
+                        data.columns.forEach(col => {
+                            const xOption = document.createElement('option');
+                            xOption.value = col;
+                            xOption.textContent = col;
+                            xAxisSelect.appendChild(xOption);
+
+                            const yOption = document.createElement('option');
+                            yOption.value = col;
+                            yOption.textContent = col;
+                            yAxisSelect.appendChild(yOption);
+                        });
+                    }
+                });
+
+            modal.show();
+        }
+
+        // 保存公式設定
+        document.getElementById('saveFormulaBtn').addEventListener('click', function () {
+            const varName = document.getElementById('variableName').value;
+            const formula = document.getElementById('formulaInput').value;
+
+            // 儲存公式 (實際需要替換此處邏輯)
+            if (!window.formulas) window.formulas = {};
+            window.formulas[varName] = formula;
+
+            // 關閉 Modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('formulaModal'));
+            modal.hide();
+
+            // 顯示成功通知
+            showNotification('公式已儲存', 'success');
+
+            // 模擬更新預覽 (實際需替換)
+            setTimeout(() => {
+                document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+            }, 300);
         });
 
-    modal.show();
-}
+        // 儲存/載入設定按鈕
+        document.getElementById('saveSettingsBtn').addEventListener('click', function () {
+            // 顯示載入中效果
+            document.getElementById('loadingOverlay').style.display = 'flex';
 
-// 保存公式設定
-document.getElementById('saveFormulaBtn').addEventListener('click', function() {
-    const varName = document.getElementById('variableName').value;
-    const formula = document.getElementById('formulaInput').value;
-    
-    // 儲存公式 (實際需要替換此處邏輯)
-    if (!window.formulas) window.formulas = {};
-    window.formulas[varName] = formula;
-    
-    // 關閉 Modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('formulaModal'));
-    modal.hide();
-    
-    // 顯示成功通知
-    showNotification('公式已儲存', 'success');
-    
-    // 模擬更新預覽 (實際需替換)
-    setTimeout(() => {
-        document.getElementById('filterForm').dispatchEvent(new Event('submit'));
-    }, 300);
-});
+            // 模擬儲存設定 (實際應用需要替換為真實 AJAX)
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showNotification('公式設定已儲存', 'success');
+            }, 800);
+        });
 
-// 儲存/載入設定按鈕
-document.getElementById('saveSettingsBtn').addEventListener('click', function() {
-    // 顯示載入中效果
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    // 模擬儲存設定 (實際應用需要替換為真實 AJAX)
-    setTimeout(() => {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        showNotification('公式設定已儲存', 'success');
-    }, 800);
-});
+        document.getElementById('loadSettingsBtn').addEventListener('click', function () {
+            // 顯示載入中效果
+            document.getElementById('loadingOverlay').style.display = 'flex';
 
-document.getElementById('loadSettingsBtn').addEventListener('click', function() {
-    // 顯示載入中效果
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    // 模擬載入設定 (實際應用需要替換為真實 AJAX)
-    setTimeout(() => {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        showNotification('公式設定已載入', 'success');
-        
-        // 重新整理預覽
-        document.getElementById('filterForm').dispatchEvent(new Event('submit'));
-    }, 800);
-});
+            // 模擬載入設定 (實際應用需要替換為真實 AJAX)
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showNotification('公式設定已載入', 'success');
 
-// Word 報告產生
-document.getElementById('generateForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // 顯示載入中效果
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    // 增加動態文案
-    const loadingText = document.querySelector('.loading-text');
-    let dots = 0;
-    
-    const loadingInterval = setInterval(() => {
-        dots = (dots + 1) % 4;
-        loadingText.textContent = '產生 Word 報告中' + '.'.repeat(dots);
-    }, 500);
-    
-    // 模擬產生報告 (實際應用需要替換為真實 AJAX)
-    setTimeout(() => {
-        clearInterval(loadingInterval);
-        document.getElementById('loadingOverlay').style.display = 'none';
-        
-        showNotification('Word 報告已生成，準備下載...', 'success');
-        
-        // 模擬下載行為 (實際應用需要替換)
-        setTimeout(() => {
-            // 在實際應用中，這裡應該是提供一個下載連結
-            showNotification('Word 報告已下載完成', 'success');
-        }, 1000);
-    }, 2500);
-});
+                // 重新整理預覽
+                document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+            }, 800);
+        });
+
+        // Word 報告產生
+        document.getElementById('generateForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // 顯示載入中效果
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // 增加動態文案
+            const loadingText = document.querySelector('.loading-text');
+            let dots = 0;
+
+            const loadingInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                loadingText.textContent = '產生 Word 報告中' + '.'.repeat(dots);
+            }, 500);
+
+            // 模擬產生報告 (實際應用需要替換為真實 AJAX)
+            setTimeout(() => {
+                clearInterval(loadingInterval);
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                showNotification('Word 報告已生成，準備下載...', 'success');
+
+                // 模擬下載行為 (實際應用需要替換)
+                setTimeout(() => {
+                    // 在實際應用中，這裡應該是提供一個下載連結
+                    showNotification('Word 報告已下載完成', 'success');
+                }, 1000);
+            }, 2500);
+        });
