@@ -67,7 +67,6 @@ def generate_chart(df, x_col, y_col, chart_type, output_path, dpi_scale=2):
     else:
         raise ValueError(f"不支援的圖表類型: {chart_type}")
 
-    # 加強版 - 統一主題
     fig.update_layout(
         template='none',
         font_family=os.path.join("fonts", "cwTeXQYuan-Medium.ttf"),
@@ -76,8 +75,8 @@ def generate_chart(df, x_col, y_col, chart_type, output_path, dpi_scale=2):
         yaxis_title_font_size=16,
         legend_title_font_size=16,
         font_size=14,
-        paper_bgcolor='white',   # 🔥加這行：外框背景純白
-        plot_bgcolor='white'     # 🔥加這行：繪圖區背景純白
+        paper_bgcolor='white',
+        plot_bgcolor='white'
     )
 
     fig.write_image(output_path, width=800, height=600, scale=dpi_scale)
@@ -120,7 +119,6 @@ def convert_docx_to_html(template_path):
 
     for para in document.paragraphs:
         line = para.text
-        # 注意：確保使用 data-variable 而不是 data-var
         line = re.sub(r"\{\{\s*(.*?)\s*\}\}", r'<span class="variable editable" data-variable="\1">{{\1}}</span>', line)
         html += f"<div>{line}</div>\n"
 
@@ -215,7 +213,6 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
                 # 如果是數值，直接替換
                 formula = re.sub(r'\b' + re.escape(var_name) + r'\b', str(var_value), formula)
 
-        # print(f"最終評估公式: {formula}")
         eval_globals = {"df": df, "np": np}
         eval_globals.update(context)
 
@@ -244,7 +241,6 @@ def home():
     message = request.args.get('message', '')
     return render_template('home.html', message=message)
 
-# 上傳頁面 - 對應原本的 index，保持原來的功能
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     global cached_docx_path, cached_csv_path
