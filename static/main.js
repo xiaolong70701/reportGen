@@ -44,19 +44,111 @@ function setupChartToggles() {
     });
 }
 
-// 新增函數：使用 Chart.js 生成圖表預覽
-function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData) {
-    const imgContainer = document.getElementById(`chart-${varName}`);
-    imgContainer.innerHTML = '';
+function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, chartTitle) {
+    console.log(`【開始生成圖表】變數: ${varName}, X軸: ${xAxis}, Y軸: ${yAxis}, 類型: ${chartType}, 標題: "${chartTitle}"`);
+    console.log(`formulas[${varName}]:`, JSON.stringify(formulas[varName]));
+    const chartContainer = document.getElementById(`chart-${varName}`);
+    chartContainer.innerHTML = '';
 
-    const img = document.createElement('img');
-    img.src = `/generated/${varName}.png`; // 🔥直接讀 /generated/xxx.png
-    img.alt = `${varName} 圖表`;
-    img.style.maxWidth = '60%';
-    img.style.height = 'auto';
-    imgContainer.appendChild(img);
+    if (!filteredData || filteredData.length === 0) {
+        chartContainer.innerHTML = '<p class="text-danger">沒有資料可顯示圖表</p>';
+        return;
+    }
+
+    const plotArea = document.createElement('div');
+    plotArea.id = `plot-area-${varName}`;
+    plotArea.style.width = '90%';
+    plotArea.style.maxWidth = '800px';
+    plotArea.style.margin = '0 auto';
+    chartContainer.appendChild(plotArea);
+    
+    // 對標題進行特殊處理 - 徹底解決問題
+    // 如果有提供標題就使用它，否則使用變數名稱
+    // 注意：空字串 "" 應被視為有效標題（用戶想要清空標題）
+    const finalTitle = (chartTitle !== undefined && chartTitle !== null) ? chartTitle : varName;
+    
+    console.log(`處理變數 ${varName} 的圖表，標題: "${finalTitle}"`);
+    console.log(`圖表標題參數 (${varName}): "${chartTitle}"`);
+    console.log(`最終設定的標題: "${finalTitle}"`);
+
+    let plotData = [];
+    
+    // 創建 layout 時徹底修改標題設定方式
+    let layout = {
+        margin: { t: 80, b: 60, l: 60, r: 60 },
+        height: 400,
+        autosize: true
+    };
+    
+    // 只有當標題非空時才設置標題
+    if (finalTitle !== "") {
+        layout.title = {
+            text: finalTitle,
+            font: {
+                size: 20
+            },
+            x: 0.5,
+            xanchor: 'center'
+        };
+    }
+    
+    // 記錄 layout 設定
+    console.log('Plotly 使用的 layout:', JSON.stringify(layout));
+
+    if (chartType === 'line') {
+        const grouped = {};
+        filteredData.forEach(row => {
+            const dateStr = new Date(row[xAxis]).toISOString().slice(0, 10);
+            grouped[dateStr] = (grouped[dateStr] || 0) + (Number(row[yAxis]) || 0);
+        });
+        const x = Object.keys(grouped).sort();
+        const y = x.map(date => grouped[date]);
+        plotData = [{ x, y, mode: 'lines+markers', type: 'scatter' }];
+    } else if (chartType === 'bar') {
+        const grouped = {};
+        filteredData.forEach(row => {
+            const key = row[xAxis];
+            grouped[key] = (grouped[key] || 0) + (Number(row[yAxis]) || 0);
+        });
+        const x = Object.keys(grouped);
+        const y = x.map(k => grouped[k]);
+        plotData = [{ x, y, type: 'bar' }];
+    } else if (chartType === 'hist') {
+        const values = filteredData.map(row => Number(row[yAxis])).filter(v => !isNaN(v));
+        plotData = [{ x: values, type: 'histogram', nbinsx: 20 }];
+    } else if (chartType === 'pie') {
+        const grouped = {};
+        filteredData.forEach(row => {
+            const key = row[xAxis];
+            grouped[key] = (grouped[key] || 0) + (Number(row[yAxis]) || 0);
+        });
+        const labels = Object.keys(grouped);
+        const values = labels.map(k => grouped[k]);
+        plotData = [{ labels, values, type: 'pie' }];
+    } else {
+        chartContainer.innerHTML = '<p class="text-danger">不支援的圖表類型</p>';
+        return;
+    }
+
+    const config = {
+        responsive: true,
+        displaylogo: false,
+        modeBarButtonsToAdd: ['toImage'],
+        toImageButtonOptions: {
+            format: 'png',
+            filename: varName,
+            height: 600,
+            width: 800,
+            scale: 2
+        }
+    };
+    
+    // 清除先前的圖表
+    Plotly.purge(plotArea);
+    
+    // 繪製新圖表，確保標題已正確設定
+    Plotly.newPlot(plotArea, plotData, layout, config);
 }
-
 
 // 新增函數：設置快速修改按鈕功能
 function setupQuickEditButtons() {
@@ -71,6 +163,7 @@ function setupQuickEditButtons() {
     });
 }
 
+// 新增函數：快速修改彈出窗口
 // 新增函數：快速修改彈出窗口
 function openQuickEditModal(varName, chartSetting) {
     // 創建快速修改的 Modal HTML
@@ -92,6 +185,10 @@ function openQuickEditModal(varName, chartSetting) {
                         <div class="mb-3">
                             <label for="quickEditYAxis" class="form-label">Y 軸欄位</label>
                             <select id="quickEditYAxis" class="form-select"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickEditChartTitle" class="form-label">圖表標題</label>
+                            <input type="text" id="quickEditChartTitle" class="form-control" placeholder="請輸入圖表標題">
                         </div>
                         <div class="mb-3">
                             <label for="quickEditChartType" class="form-label">圖表類型</label>
@@ -158,6 +255,13 @@ function openQuickEditModal(varName, chartSetting) {
                 xAxisSelect.value = chartSetting.x;
                 yAxisSelect.value = chartSetting.y;
                 document.getElementById('quickEditChartType').value = chartSetting.chartType;
+                
+                // 修正：正確設定圖表標題到輸入框
+                const titleInput = document.getElementById('quickEditChartTitle');
+                titleInput.value = chartSetting.chartTitle || '';
+                
+                // 記錄用於除錯
+                console.log(`打開快速編輯模態視窗: ${varName}, 載入標題: "${chartSetting.chartTitle}"`);
             }
         });
     
@@ -171,18 +275,28 @@ function openQuickEditModal(varName, chartSetting) {
         const newYAxis = document.getElementById('quickEditYAxis').value;
         const newChartType = document.getElementById('quickEditChartType').value;
         
+        // 獲取標題輸入框的值，但不進行 trim 處理
+        const newChartTitle = document.getElementById('quickEditChartTitle').value;
+        
         if (!newXAxis || !newYAxis) {
             alert('請選擇 X 軸和 Y 軸！');
             return;
         }
     
-        // 更新設定
+        // 除錯：記錄標題值
+        console.log(`儲存按鈕 - 變數: ${currentVariable}, 設定標題值: "${newChartTitle}"`);
+    
+        // 更新 formulas 物件
         formulas[currentVariable] = {
             type: 'chart',
             x: newXAxis,
             y: newYAxis,
-            chartType: newChartType
+            chartType: newChartType,
+            chartTitle: newChartTitle  // 直接使用輸入值，不進行加工
         };
+    
+        // 除錯：確認 formulas 已更新
+        console.log(`formulas[${currentVariable}] 已更新:`, JSON.stringify(formulas[currentVariable]));
     
         // 呼叫後端重新生成圖
         fetch('/regenerate_chart', {
@@ -193,6 +307,7 @@ function openQuickEditModal(varName, chartSetting) {
                 x: newXAxis,
                 y: newYAxis,
                 chartType: newChartType,
+                chartTitle: newChartTitle,  // 確保標題被傳遞到後端
                 dpi: parseFloat(document.getElementById('quickEditDpi').value), 
                 data: currentFilteredData.map(row => ({
                     [newXAxis]: row[newXAxis],
@@ -209,12 +324,9 @@ function openQuickEditModal(varName, chartSetting) {
                 // 關閉 Modal
                 const quickEditModal = bootstrap.Modal.getInstance(document.getElementById('quickEditModal'));
                 quickEditModal.hide();
-    
-                // 重新刷新該圖表圖片（加時間戳避免 cache）
-                const img = document.querySelector(`#chart-${currentVariable} img`);
-                if (img) {
-                    img.src = `/generated/${currentVariable}.png?t=${Date.now()}`;
-                }
+                
+                // 重新計算並渲染所有內容
+                calculateAndRender();
             }
         })
         .catch(err => {
@@ -365,6 +477,7 @@ document.getElementById('saveFormulaBtn').addEventListener('click', function() {
         const xAxis = document.getElementById('xAxisSelect').value;
         const yAxis = document.getElementById('yAxisSelect').value;
         const chartType = document.getElementById('chartTypeSelect').value;
+        const chartTitle = document.getElementById('chartTitleInput').value.trim();
 
         if (!xAxis || !yAxis || !chartType) {
             alert('請選擇完整的圖表設定 (X 軸, Y 軸, 圖表類型)！');
@@ -375,7 +488,8 @@ document.getElementById('saveFormulaBtn').addEventListener('click', function() {
             type: 'chart',
             x: xAxis,
             y: yAxis,
-            chartType: chartType
+            chartType: chartType,
+            chartTitle: chartTitle
         };
     }
 
@@ -398,6 +512,13 @@ function calculateAndRender() {
 
     showLoading();
 
+    // 除錯用：顯示所有圖表設定
+    Object.keys(formulas).forEach(key => {
+        if (formulas[key].type === 'chart') {
+            console.log(`圖表設定檢查 (${key}):`, JSON.stringify(formulas[key]));
+        }
+    });
+
     fetch('/render_preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -416,8 +537,10 @@ function calculateAndRender() {
 
             if (formulas[varName] && formulas[varName].type === 'chart') {
                 const setting = formulas[varName];
+                
+                // 除錯用：記錄在處理圖表時的標題值
+                console.log(`處理變數 ${varName} 的圖表，標題設定:`, JSON.stringify(setting));
 
-                // ✅ 這裡關鍵：濾除 undefined，然後 map 小資料集
                 const filteredData = currentFilteredData
                     .filter(row => row[setting.x] !== undefined && row[setting.y] !== undefined)
                     .map(row => ({
@@ -426,7 +549,7 @@ function calculateAndRender() {
                     }));
 
                 const chartHTML = `
-                    <div class="chart-container" style="width:1000px; height:550px; max-width:90vw; margin-left:auto; margin-right:auto;">
+                    <div class="chart-container" style="width:1000px; height:600px; max-width:90vw; margin-left:auto; margin-right:auto;">
                         <button class="btn btn-outline-primary btn-sm chart-preview-toggle mb-2">
                             <i class="bi bi-chevron-up"></i> 收起圖表
                         </button>
@@ -436,6 +559,7 @@ function calculateAndRender() {
                                     <div><strong>X 軸:</strong> ${setting.x}</div>
                                     <div><strong>Y 軸:</strong> ${setting.y}</div>
                                     <div><strong>類型:</strong> ${getChartTypeName(setting.chartType)}</div>
+                                    ${setting.chartTitle ? `<div><strong>標題:</strong> ${setting.chartTitle}</div>` : ''}
                                 </div>
                                 <button class="btn btn-sm btn-outline-secondary quick-edit-chart-btn" data-variable="${varName}">
                                     <i class="bi bi-pencil"></i> 快速修改
@@ -454,7 +578,15 @@ function calculateAndRender() {
                 `;
                 span.innerHTML = chartHTML;
 
-                generateChartPreview(varName, setting.x, setting.y, setting.chartType, filteredData);
+                // 關鍵修正：確保標題正確傳遞！
+                generateChartPreview(
+                    varName, 
+                    setting.x, 
+                    setting.y, 
+                    setting.chartType, 
+                    filteredData,
+                    setting.chartTitle  // 直接傳遞 setting.chartTitle，不做任何處理
+                );
 
             } else if (results[varName] !== undefined) {
                 const value = results[varName];
