@@ -303,9 +303,9 @@ def logout():
 @app.route('/oauth2callback')
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
-        'credentials.json',
+        '/etc/secrets/credentials.json',
         scopes=SCOPES,
-        redirect_uri=REDIRECT_URI
+        redirect_uri='https://reportgen-fn9d.onrender.com/oauth2callback'
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
