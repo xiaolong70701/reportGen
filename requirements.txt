@@ -7,3 +7,5 @@ Flask-Mail
 gunicorn
 plotly
 kaleido
+google-api-python-client
+google-auth
