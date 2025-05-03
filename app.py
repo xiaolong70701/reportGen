@@ -289,7 +289,7 @@ def login():
     flow = Flow.from_client_secrets_file(
         '/etc/secrets/credentials.json',
         scopes=SCOPES,
-        redirect_uri=REDIRECT_URI
+        redirect_uri='https://reportgen-fn9d.onrender.com/oauth2callback'
     )
     auth_url, state = flow.authorization_url(prompt='consent')
     session['state'] = state
