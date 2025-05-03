@@ -287,7 +287,7 @@ def index():
 @app.route('/login')
 def login():
     flow = Flow.from_client_secrets_file(
-        'credentials.json',
+        '/etc/secrets/credentials.json',
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
     )
