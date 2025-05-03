@@ -3,11 +3,15 @@ import base64
 import os
 import re
 import json
-from flask import Flask, request, render_template, send_file, redirect, url_for, jsonify, flash, send_from_directory
+from flask import Flask, request, render_template, send_file, redirect, url_for, jsonify, session, flash, send_from_directory
 import pandas as pd
 import numpy as np
 from docxtpl import DocxTemplate, InlineImage
 from docx.shared import Mm
+from google_auth_oauthlib.flow import Flow
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 import plotly.express as px      
 from docxtpl import DocxTemplate
 from dotenv import load_dotenv
@@ -17,12 +21,15 @@ from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 load_dotenv('.env')
 
 UPLOAD_FOLDER = 'uploads'
 GENERATED_FOLDER = 'generated'
 SETTINGS_PATH = os.path.join(UPLOAD_FOLDER, 'settings.json')
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(GENERATED_FOLDER, exist_ok=True)
@@ -276,6 +283,69 @@ def upload():
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     return upload()
+
+@app.route('/login')
+def login():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
+    )
+    auth_url, state = flow.authorization_url(prompt='consent')
+    session['state'] = state
+    return redirect(auth_url)
+
+@app.route('/logout')
+def logout():
+    session.pop('credentials', None)
+    return redirect('/')
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
+    )
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+    session['credentials'] = {
+        'token': creds.token,
+        'refresh_token': creds.refresh_token,
+        'token_uri': creds.token_uri,
+        'client_id': creds.client_id,
+        'client_secret': creds.client_secret,
+        'scopes': creds.scopes
+    }
+    return redirect('/')
+
+@app.route('/set_token', methods=['POST'])
+def set_token():
+    data = request.get_json()
+    token = data.get('token')
+
+    if not token:
+        return jsonify({'success': False, 'error': 'Missing token'}), 400
+
+    # 用 token 建立憑證物件
+    creds = Credentials(token=token)
+    session['credentials'] = {
+        'token': creds.token,
+        'refresh_token': None,
+        'token_uri': "https://oauth2.googleapis.com/token",
+        'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+        'client_secret': '',  # 可以留空，不需要設定
+        'scopes': SCOPES
+    }
+
+    return jsonify({'success': True})
+
+
+@app.route('/save_token', methods=['POST'])
+def save_token():
+    data = request.get_json()
+    session['google_access_token'] = data.get('access_token')
+    return jsonify({"success": True})
 
 @app.route('/preview', methods=['GET'])
 def preview():
@@ -759,6 +829,65 @@ def download_sample():
         doc.save(sample_path)
     
     return send_file(sample_path, as_attachment=True)
+
+@app.route('/config')
+def get_config():
+    return jsonify({
+        "GOOGLE_CLIENT_ID": os.getenv("GOOGLE_CLIENT_ID"),
+        "GOOGLE_DEVELOPER_KEY": os.getenv("GOOGLE_DEVELOPER_KEY")
+    })
+
+@app.route('/import_drive_file')
+def import_drive_file():
+    global cached_docx_path, cached_csv_path
+
+    file_id = request.args.get('file_id')
+    file_type = request.args.get('type')  # 可用來判斷是哪種檔案：docx、csv、json
+
+    if not file_id or not file_type:
+        return jsonify(success=False, error="Missing parameters")
+
+    if 'credentials' not in session:
+        return jsonify(success=False, error="Not logged in to Google")
+
+    try:
+        creds = Credentials(**session['credentials'])
+        drive_service = build('drive', 'v3', credentials=creds)
+        metadata = drive_service.files().get(fileId=file_id).execute()
+        file_name = metadata['name']
+        mime_type = metadata['mimeType']
+
+        ext = {
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+            'text/csv': 'csv',
+            'application/json': 'json'
+        }.get(mime_type)
+
+        if not ext:
+            return jsonify(success=False, error="Unsupported file type")
+
+        save_folder = 'uploads'
+        os.makedirs(save_folder, exist_ok=True)
+        timestamped_name = datetime.now().strftime('%Y%m%d%H%M%S_') + secure_filename(file_name)
+        save_path = os.path.join(save_folder, timestamped_name)
+
+        request_drive = drive_service.files().get_media(fileId=file_id)
+        with io.FileIO(save_path, 'wb') as fh:
+            downloader = MediaIoBaseDownload(fh, request_drive)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+
+        # 🔥 根據檔案類型設為 cached_xxx_path
+        if ext == 'docx':
+            cached_docx_path = save_path
+        elif ext == 'csv':
+            cached_csv_path = save_path
+        # 設定檔不用設 cached，但可擴充處理
+        return jsonify(success=True, filename=timestamped_name, file_type=ext, mime_type=mime_type)
+
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
 
 if __name__ == '__main__':
     app.run(debug=True, port="8000")

@@ -11,6 +11,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script defer src="{{ url_for('static', filename='picker.js') }}"></script>
 </head>
 
 <body>
@@ -52,13 +55,11 @@
           </div>
 
           <form method="POST" enctype="multipart/form-data" class="row g-4">
-
             <!-- Word 模板上傳 -->
             <div class="col-12">
-              <label for="docx_file_real" class="form-label"><i class="bi bi-file-earmark-word me-2"></i>Word 模板
-                (.docx)</label>
+              <label for="docx_file_real" class="form-label"><i class="bi bi-file-earmark-word me-2"></i>Word 模板 (.docx)</label>
               <div class="custom-file-input">
-                <label class="file-label" for="docx_file_real">
+                <label class="file-label" for="docx_file_real" data-type="docx" onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
                     <i class="bi bi-file-earmark-word"></i>
                   </div>
@@ -71,10 +72,9 @@
 
             <!-- CSV 資料檔案上傳 -->
             <div class="col-12">
-              <label for="csv_file_real" class="form-label"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV 資料檔案
-                (.csv)</label>
+              <label for="csv_file_real" class="form-label"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV 資料檔案 (.csv)</label>
               <div class="custom-file-input">
-                <label class="file-label" for="csv_file_real">
+                <label class="file-label" for="csv_file_real" data-type="csv" onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
                     <i class="bi bi-file-earmark-excel"></i>
                   </div>
@@ -89,7 +89,7 @@
             <div class="col-12">
               <label for="settings_file_real" class="form-label"><i class="bi bi-gear me-2"></i>設定檔 (可選) (.json)</label>
               <div class="custom-file-input">
-                <label class="file-label" for="settings_file_real">
+                <label class="file-label" for="settings_file_real" data-type="json" onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
                     <i class="bi bi-file-earmark-code"></i>
                   </div>
@@ -107,8 +107,24 @@
                 <i class="bi bi-rocket me-2"></i>開始設定
               </button>
             </div>
-
           </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="uploadSourceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow">
+        <div class="modal-header">
+          <h5 class="modal-title">選擇上傳來源</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+        </div>
+        <div class="modal-body text-center">
+          <button class="btn btn-outline-primary w-100 mb-2" onclick="triggerLocalUpload()">從本機上傳</button>
+          <button class="btn btn-outline-success w-100" onclick="triggerDriveUpload()">從 Google Drive 選取</button>
         </div>
       </div>
     </div>
@@ -116,7 +132,35 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // 檔案選擇後顯示檔名
+    let currentUploadType = null;
+
+    function openUploadSourceModal(event) {
+      event.preventDefault();
+      currentUploadType = event.currentTarget.getAttribute('data-type');
+      const modal = new bootstrap.Modal(document.getElementById('uploadSourceModal'));
+      modal.show();
+    }
+
+    function triggerLocalUpload() {
+      const mapping = {
+        docx: 'docx_file_real',
+        csv: 'csv_file_real',
+        json: 'settings_file_real'
+      };
+      const target = document.getElementById(mapping[currentUploadType]);
+      if (target) target.click();
+      closeUploadSourceModal();
+    }
+
+    function triggerDriveUpload() {
+      if (typeof startPicker === 'function') {
+        startPicker(currentUploadType);
+        closeUploadSourceModal();
+      } else {
+        alert("尚未載入 Google Picker");
+      }
+    }
+
     document.getElementById('docx_file_real').addEventListener('change', function (e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
       document.getElementById('docx_file_name').textContent = fileName;
@@ -132,38 +176,36 @@
       document.getElementById('settings_file_name').textContent = fileName;
     });
 
-    // 拖放檔案功能
     const fileInputs = document.querySelectorAll('.custom-file-input');
-
     fileInputs.forEach(fileInput => {
       fileInput.addEventListener('dragover', e => {
         e.preventDefault();
         fileInput.style.borderColor = '#4361ee';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
       });
-
       fileInput.addEventListener('dragleave', e => {
         e.preventDefault();
         fileInput.style.borderColor = '#dee2e6';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
       });
-
       fileInput.addEventListener('drop', e => {
         e.preventDefault();
         fileInput.style.borderColor = '#dee2e6';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
-
         const input = fileInput.querySelector('input[type="file"]');
         if (e.dataTransfer.files.length > 0 && input.accept.includes(e.dataTransfer.files[0].name.split('.').pop())) {
           input.files = e.dataTransfer.files;
-
-          // 觸發 change 事件
           const event = new Event('change', { bubbles: true });
           input.dispatchEvent(event);
         }
       });
     });
+
+    function closeUploadSourceModal() {
+      const modalEl = document.getElementById('uploadSourceModal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+    }
   </script>
 </body>
-
 </html>
