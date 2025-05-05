@@ -5,29 +5,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>上傳資料</title>
+  <!--Web page illustration settings -->
   <link rel="icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app-logo-no-text.svg') }}">
+  <!--Introduction of external CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://apis.google.com/js/api.js"></script>
+  <!--Google API related scripts -->
+  <script src="https://apis.google.com/js/api.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script defer src="{{ url_for('static', filename='picker.js') }}"></script>
 </head>
 
 <body>
-
+  <!--Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
+      <!--Website Brand Logo and Name -->
       <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
         <i class="bi bi-file-earmark-word me-2"></i>
         <span>Word 報表生成器</span>
       </a>
+      <!--Movement device navigation fold button -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+      <!--Navigation Project -->
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
@@ -41,11 +47,13 @@
     </div>
   </nav>
 
+  <!--Main content area -->
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-8">
+        <!--Upload card -->
         <div class="upload-card card shadow p-4 p-md-5">
-
+          <!--Page Title and Description -->
           <div class="text-center mb-5">
             <div class="header-icon">
               <i class="bi bi-cloud-arrow-up"></i>
@@ -54,10 +62,12 @@
             <p class="text-muted">請上傳 Word 模板、CSV 資料檔案，如果有設定檔也可以一起上傳。</p>
           </div>
 
+          <!--Archive Upload Form -->
           <form method="POST" enctype="multipart/form-data" class="row g-4">
-            <!-- Word 模板上傳 -->
+            <!--Word template upload field -->
             <div class="col-12">
-              <label for="docx_file_real" class="form-label"><i class="bi bi-file-earmark-word me-2"></i>Word 模板 (.docx)</label>
+              <label for="docx_file_real" class="form-label"><i class="bi bi-file-earmark-word me-2"></i>Word 模板
+                (.docx)</label>
               <div class="custom-file-input">
                 <label class="file-label" for="docx_file_real" data-type="docx" onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
@@ -70,9 +80,10 @@
               </div>
             </div>
 
-            <!-- CSV 資料檔案上傳 -->
+            <!--CSV file upload field -->
             <div class="col-12">
-              <label for="csv_file_real" class="form-label"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV 資料檔案 (.csv)</label>
+              <label for="csv_file_real" class="form-label"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV 資料檔案
+                (.csv)</label>
               <div class="custom-file-input">
                 <label class="file-label" for="csv_file_real" data-type="csv" onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
@@ -85,11 +96,12 @@
               </div>
             </div>
 
-            <!-- 設定檔上傳 -->
+            <!--Set the file upload field (optional) -->
             <div class="col-12">
               <label for="settings_file_real" class="form-label"><i class="bi bi-gear me-2"></i>設定檔 (可選) (.json)</label>
               <div class="custom-file-input">
-                <label class="file-label" for="settings_file_real" data-type="json" onclick="openUploadSourceModal(event)">
+                <label class="file-label" for="settings_file_real" data-type="json"
+                  onclick="openUploadSourceModal(event)">
                   <div class="file-icon">
                     <i class="bi bi-file-earmark-code"></i>
                   </div>
@@ -101,47 +113,73 @@
               <div class="form-text mt-2">如果是第一次設定，可以不用上傳設定檔。</div>
             </div>
 
-            <!-- 送出按鈕 -->
+            <!--Submit Button -->
             <div class="col-12 d-grid mt-4">
               <button type="submit" class="submit-btn btn btn-primary btn-lg">
                 <i class="bi bi-rocket me-2"></i>開始設定
               </button>
             </div>
           </form>
-
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal -->
+  <!--Upload source selection pop-up window -->
   <div class="modal fade" id="uploadSourceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content shadow">
-        <div class="modal-header">
-          <h5 class="modal-title">選擇上傳來源</h5>
+      <div class="modal-content shadow border-0">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold">選擇上傳來源</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
         </div>
-        <div class="modal-body text-center">
-          <button class="btn btn-outline-primary w-100 mb-2" onclick="triggerLocalUpload()">從本機上傳</button>
-          <button class="btn btn-outline-success w-100" onclick="triggerDriveUpload()">從 Google Drive 選取</button>
+        <div class="modal-body pt-3 pb-4 px-4">
+          <!-- Upload from Local -->
+          <div class="upload-option mb-3">
+            <button class="btn btn-outline-primary w-100 p-3 rounded-4 d-flex align-items-center justify-content-center"
+              onclick="triggerLocalUpload()">
+              <i class="bi bi-laptop me-2 fs-5"></i>
+              <span class="fs-6">從電腦上傳</span>
+            </button>
+          </div>
+
+          <!-- Upload from Google Drive -->
+          <div class="upload-option">
+            <button class="btn btn-primary w-100 p-3 rounded-4 d-flex align-items-center justify-content-center"
+              onclick="triggerDriveUpload()">
+              <i class="bi bi-cloud-arrow-up-fill me-2 fs-5"></i>
+              <span class="fs-6">連線到 Google Drive</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!--Introduction to Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!--Custom script -->
   <script>
+    //The currently selected upload file type
     let currentUploadType = null;
 
+    /**
+     *Open the upload source selection pop-up window
+     *@param {Event} event -Click event
+     */
     function openUploadSourceModal(event) {
       event.preventDefault();
+      //Get the file type of the current click (docx/csv/json)
       currentUploadType = event.currentTarget.getAttribute('data-type');
       const modal = new bootstrap.Modal(document.getElementById('uploadSourceModal'));
       modal.show();
     }
 
+    /**
+     *Trigger the upload of this machine file
+     */
     function triggerLocalUpload() {
+      //Input element ID corresponding to the file type
       const mapping = {
         docx: 'docx_file_real',
         csv: 'csv_file_real',
@@ -152,6 +190,9 @@
       closeUploadSourceModal();
     }
 
+    /**
+     *Trigger Google Drive profile selection
+     */
     function triggerDriveUpload() {
       if (typeof startPicker === 'function') {
         startPicker(currentUploadType);
@@ -161,46 +202,60 @@
       }
     }
 
+    //Listen to Word file selection changes
     document.getElementById('docx_file_real').addEventListener('change', function (e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
       document.getElementById('docx_file_name').textContent = fileName;
     });
 
+    //Listen to CSV file selection changes
     document.getElementById('csv_file_real').addEventListener('change', function (e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
       document.getElementById('csv_file_name').textContent = fileName;
     });
 
+    //Monitor setting file selection changes
     document.getElementById('settings_file_real').addEventListener('change', function (e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
       document.getElementById('settings_file_name').textContent = fileName;
     });
 
+    //Set drag and drop function
     const fileInputs = document.querySelectorAll('.custom-file-input');
     fileInputs.forEach(fileInput => {
+      //Visual feedback when dragging the file to the area
       fileInput.addEventListener('dragover', e => {
         e.preventDefault();
         fileInput.style.borderColor = '#4361ee';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
       });
+
+      //Restore style when dragging the file out of the area
       fileInput.addEventListener('dragleave', e => {
         e.preventDefault();
         fileInput.style.borderColor = '#dee2e6';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
       });
+
+      //Handle file drag and drop
       fileInput.addEventListener('drop', e => {
         e.preventDefault();
+        //Restore style
         fileInput.style.borderColor = '#dee2e6';
         fileInput.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+
         const input = fileInput.querySelector('input[type="file"]');
+        //Check whether the drag-and-drop file type meets the accepted type
         if (e.dataTransfer.files.length > 0 && input.accept.includes(e.dataTransfer.files[0].name.split('.').pop())) {
           input.files = e.dataTransfer.files;
+          //Trigger change event to update the file name to display
           const event = new Event('change', { bubbles: true });
           input.dispatchEvent(event);
         }
       });
     });
 
+    // Close the upload source selection pop-up window
     function closeUploadSourceModal() {
       const modalEl = document.getElementById('uploadSourceModal');
       const modal = bootstrap.Modal.getInstance(modalEl);
@@ -208,4 +263,5 @@
     }
   </script>
 </body>
+
 </html>
