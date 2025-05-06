@@ -147,43 +147,43 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
         col_map = {col.lower(): col for col in df.columns}
         variables_in_formula = re.findall(r"[a-zA-Z_][a-zA-Z0-9_]*", formula)
         
-        # 首先處理公式中的變數依賴
+        # First deal with variable dependencies in formulas
         processed_vars = set()
         for var in variables_in_formula:
             if var not in context and var in formulas and var not in processed_vars:
-                # 避免循環依賴
+                # Avoid circular dependencies
                 processed_vars.add(var)
                 try:
-                    # 遞迴計算依賴變數的值
+                    # Redirectly calculate the value of the dependent variable
                     next_formula = formulas[var]
                     if isinstance(next_formula, dict) and next_formula.get('type') == 'formula':
                         next_formula = next_formula.get('value', '')
                     context[var] = evaluate_formula(next_formula, df, context, formulas)
-                    # print(f"已計算變數 {var} = {context[var]}")
+                    # print(f"Computed variable {var} = {context[var]}")
                 except Exception as e:
-                    # print(f"計算變數 {var} 時發生錯誤: {str(e)}")
+                    # print(f"Error occurred while calculating variable {var}: {str(e)}")
                     raise ValueError(f"變數 {var} 計算錯誤: {str(e)}")
 
-        # 處理列名大小寫不敏感
+        # Handle column name case insensitivity
         for var in variables_in_formula:
             var_lower = var.lower()
             if var_lower in col_map:
                 correct_col = col_map[var_lower]
                 formula = re.sub(r'\b' + re.escape(var) + r'\b', correct_col, formula)
 
-        # 處理特殊函數
+        # Handle special functions
         formula = re.sub(r'COUNT\s*\(\s*DISTINCT\s*\((.*?)\)\s*\)', r'df["\1"].nunique()', formula, flags=re.I)
         formula = re.sub(r'MODE\s*\(\s*(.*?)\s*\)', r'df["\1"].mode().iloc[0] if len(df["\1"].mode()) > 0 else None', formula, flags=re.I)
-        # 處理特殊的 COUNT(condition) 情況
+        # Handle special COUNT(condition) situations
         count_pattern = re.compile(r'COUNT\s*\(\s*(.+?)\s*\)', re.I)
         for match in count_pattern.finditer(formula):
             content = match.group(1)
             if '==' in content or '!=' in content or '>' in content or '<' in content or '>=' in content or '<=' in content:
-                # 條件表達式
+                # Conditional expression
                 replacement = f'(df.query("{content.replace("==", "==")}", engine="python").shape[0])'
                 formula = formula.replace(match.group(0), replacement)
             else:
-                # 普通列計數
+                # Normal column count
                 replacement = f'df["{content}"].count()'
                 formula = formula.replace(match.group(0), replacement)
 
@@ -213,13 +213,13 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
             periods = float(parts[2])
             return (end_val / start_val) ** (1/periods) - 1
 
-        # 將變數替換為實際值
+        # Replace variables with actual values
         for var_name, var_value in context.items():
             if isinstance(var_value, str):
-                # 如果是字串，需要加引號
+                # If it is a string, quotes are required
                 formula = re.sub(r'\b' + re.escape(var_name) + r'\b', f"'{var_value}'", formula)
             else:
-                # 如果是數值，直接替換
+                # If it is a numeric value, replace it directly
                 formula = re.sub(r'\b' + re.escape(var_name) + r'\b', str(var_value), formula)
 
         eval_globals = {"df": df, "np": np}
@@ -244,7 +244,7 @@ def evaluate_formula(formula: str, df: pd.DataFrame, context: dict = None, formu
     except Exception as e:
         raise ValueError(f"公式錯誤：{str(e)}")
 
-# 新增首頁路由
+# Add homepage route
 @app.route('/')
 def home():
     message = request.args.get('message', '')
@@ -279,7 +279,7 @@ def upload():
 
     return render_template('index.html')
 
-# 保留原來的 index 路由，但現在轉發到 upload 函數
+# Keep the original index route, but now forward to the upload function
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     return upload()
@@ -327,14 +327,14 @@ def set_token():
     if not token:
         return jsonify({'success': False, 'error': 'Missing token'}), 400
 
-    # 用 token 建立憑證物件
+    # Create credentials with token
     creds = Credentials(token=token)
     session['credentials'] = {
         'token': creds.token,
         'refresh_token': None,
         'token_uri': "https://oauth2.googleapis.com/token",
         'client_id': os.getenv("GOOGLE_CLIENT_ID"),
-        'client_secret': '',  # 可以留空，不需要設定
+        'client_secret': '',  # Can be left blank, no need to set it
         'scopes': SCOPES
     }
 
@@ -400,7 +400,7 @@ def render_preview():
     calculated_context = {}
     special_vars = ['start_date', 'end_date']
 
-    # 建立公式依賴關係圖
+    # Create a formula dependency diagram
     formula_graph = {}
     for var, formula_info in formulas.items():
         if isinstance(formula_info, dict) and formula_info.get('type') == 'formula':
@@ -564,7 +564,7 @@ def render_word():
     context = {}
     calculated_context = {} # Keep track of calculated values for dependencies
 
-    # --- Explicitly add start_date and end_date ---
+    # ---Explicitly add start_date and end_date ---
     # Ensure they are set before potentially complex formula evaluations.
     if 'start_date' in formulas and isinstance(formulas['start_date'], dict) and formulas['start_date'].get('type') == 'fixed':
         start_date_val = formulas['start_date'].get('value', '')
@@ -578,7 +578,7 @@ def render_word():
         calculated_context['end_date'] = end_date_val
         print(f"DEBUG (render_word): Explicitly set end_date in context: {end_date_val}")
 
-    # --- Topological Sort Logic ---
+    # ---Topological Sort Logic ---
     formula_graph = {}
     valid_vars = set(formulas.keys()) # Keep track of variables defined in formulas
 
@@ -656,7 +656,7 @@ def render_word():
     # No need to reverse if appending happens after visiting dependencies
     print(f"DEBUG (render_word): Formula calculation order: {order}")
 
-    # --- Initialize DocxTemplate ---
+    # ---Initialize DocxTemplate ---
     try:
         doc = DocxTemplate(cached_docx_path)
     except Exception as e:
@@ -664,7 +664,7 @@ def render_word():
          return f"錯誤：無法加載 Word 模板 '{os.path.basename(cached_docx_path)}': {str(e)}", 500
 
 
-    # --- Process variables ---
+    # ---Process variables ---
     # Process variables NOT necessarily in the determined order first,
     # especially fixed values or those without dependencies that weren't explicitly handled (like dates).
     for var, setting in formulas.items():
@@ -691,7 +691,7 @@ def render_word():
                          value_to_set = str(setting) # Convert dict to string as fallback
 
                 else: # Handle cases where 'setting' is not a dictionary (e.g., simple value)
-                    # Could be a simple formula string - attempt evaluation
+                    # Could be a simple formula string -attempt evaluation
                     try:
                          value_to_set = evaluate_formula(str(setting), filtered_df, context=calculated_context, formulas=formulas)
                     except ValueError: # If evaluation fails, treat as literal string
@@ -715,7 +715,7 @@ def render_word():
                 calculated_context[var] = None # Mark as error in calculated context
 
 
-    # --- Process variables IN topological order ---
+    # ---Process variables IN topological order ---
     for var in order:
         # Ensure the variable is actually in formulas before processing
         if var not in formulas:
@@ -823,7 +823,7 @@ def render_word():
             context[var] = f"[處理錯誤: {str(e)}]"
             calculated_context[var] = None # Mark as error in calculated context
 
-    # --- Final rendering ---
+    # ---Final rendering ---
     try:
         print(f"DEBUG (render_word): Final context for rendering: {context}") # Debug: print final context
         doc.render(context)
@@ -845,19 +845,19 @@ def save_settings():
     settings = request.json
     formulas = settings.get('formulas', {})
 
-    # 自動正規化 formulas
+    # Automatic regularization formulas
     new_formulas = {}
     for var, setting in formulas.items():
         if isinstance(setting, dict) and 'type' in setting:
             new_formulas[var] = setting
         else:
-            # 舊格式，補成 type=formula
+            # Old format, supplemented to type=formula
             new_formulas[var] = {
                 "type": "formula",
                 "value": setting
             }
 
-    # 重新組成完整 settings
+    # Re-form complete settings
     new_settings = {
         "formulas": new_formulas
     }
@@ -880,7 +880,7 @@ def load_settings():
         if isinstance(setting, dict) and 'type' in setting:
             new_formulas[var] = setting
         else:
-            # 舊格式，補成 type=formula
+            # Old format, supplemented to type=formula
             new_formulas[var] = {
                 "type": "formula",
                 "value": setting
@@ -911,7 +911,7 @@ def regenerate_chart():
     chart_type = content.get('chartType')
     chart_title = content.get('chartTitle')
     data = content.get('data')
-    dpi_scale = content.get('dpi', 2)  # 🔥 預設 dpi_scale 2
+    dpi_scale = content.get('dpi', 2)  # 🔥 Preset dpi_scale 2
 
     if not all([var_name, x_col, y_col, chart_type, data]):
         return jsonify({'error': '缺少必要參數'}), 400
@@ -923,7 +923,7 @@ def regenerate_chart():
 
     try:
         save_path = os.path.join('generated', f'{var_name}.png')
-        generate_chart(df, x_col, y_col, chart_type, save_path, chart_title=chart_title, dpi_scale=dpi_scale)  # 🔥 使用上面的 generate_chart
+        generate_chart(df, x_col, y_col, chart_type, save_path, chart_title=chart_title, dpi_scale=dpi_scale)  # 🔥 Use the generated_chart above
         return jsonify({'message': '重新產生完成'})
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -931,22 +931,22 @@ def regenerate_chart():
 @app.route('/get_chart_preview', methods=['POST'])
 def get_chart_preview():
     content = request.get_json()
-    var_name = content.get('varName')  # 🔥 傳進來變數名
+    var_name = content.get('varName')  # 🔥 Variable names are passed in
     
     if not var_name:
         return jsonify({'error': '缺少變數名稱'}), 400
 
-    filename = f"{var_name}.png"  # 圖片檔案命名規則
+    filename = f"{var_name}.png"  # Photo archive naming rules
     filepath = os.path.join('generated', filename)
 
     if not os.path.exists(filepath):
         return jsonify({'error': '找不到圖片'}), 404
 
-    # 🔥 回傳圖片 URL，而不是 base64
+    # 🔥 Return the image URL instead of base64
     return jsonify({'image_url': url_for('static', filename=f'../generated/{filename}')})
 
 
-# 聯絡表單處理路由
+# Contact form to process routing
 @app.route('/contact', methods=['POST'])
 def contact():
     name = request.form.get('name')
@@ -975,14 +975,14 @@ def contact():
 
     return redirect(url_for('home'))
 
-# 處理示例模板下載的路由
+# Process the route for downloading example templates
 @app.route('/download_sample', methods=['GET'])
 def download_sample():
     sample_path = os.path.join('static', 'samples', 'sample_template.docx')
-    # 確保目錄存在
+    # Make sure the directory exists
     os.makedirs(os.path.dirname(sample_path), exist_ok=True)
     
-    # 如果文件不存在，創建一個簡單的樣本文件
+    # If the file does not exist, create a simple sample file
     if not os.path.exists(sample_path):
         from docx import Document
         doc = Document()
@@ -1009,7 +1009,7 @@ def import_drive_file():
     global cached_docx_path, cached_csv_path
 
     file_id = request.args.get('file_id')
-    file_type = request.args.get('type')  # 可用來判斷是哪種檔案：docx、csv、json
+    file_type = request.args.get('type')  # Can be used to determine which file it is: docx, csv, json
 
     if not file_id or not file_type:
         return jsonify(success=False, error="Missing parameters")
@@ -1045,12 +1045,12 @@ def import_drive_file():
             while not done:
                 status, done = downloader.next_chunk()
 
-        # 🔥 根據檔案類型設為 cached_xxx_path
+        # 🔥 Set to cached_xxx_path according to file type
         if ext == 'docx':
             cached_docx_path = save_path
         elif ext == 'csv':
             cached_csv_path = save_path
-        # 設定檔不用設 cached，但可擴充處理
+        # You do not need to set cached for setting files, but can be expanded
         return jsonify(success=True, filename=timestamped_name, file_type=ext, mime_type=mime_type)
 
     except Exception as e:

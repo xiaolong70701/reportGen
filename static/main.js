@@ -6,13 +6,70 @@ function hideLoading() {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-let currentFilteredData = [];    // 篩選後的小資料集
-let formulas = {};               // 每個變數的公式或圖表設定
-let currentVariable = '';        // 當前選擇的變數
+function showNotification(message, type = 'info', delay = 3000) { // type 可以是 success, warning, danger, info 等 Bootstrap 背景色
+    // 建立通知元素
+    const notification = document.createElement('div');
+    // 確保使用有效的 Bootstrap 背景色類別
+    const validTypes = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
+    const bgType = validTypes.includes(type) ? type : 'info'; // 預設為 info
+    const textClass = (bgType === 'light' || bgType === 'warning') ? 'text-dark' : 'text-white'; // 淺色和警告色背景用深色文字
+
+    notification.className = `toast align-items-center ${textClass} bg-${bgType} border-0`;
+    notification.setAttribute('role', 'alert');
+    notification.setAttribute('aria-live', 'assertive');
+    notification.setAttribute('aria-atomic', 'true');
+
+    // 判斷圖標
+    let iconClass = 'bi-info-circle-fill';
+    switch(type) {
+        case 'success': iconClass = 'bi-check-circle-fill'; break;
+        case 'warning': iconClass = 'bi-exclamation-triangle-fill'; break;
+        case 'danger': iconClass = 'bi-x-octagon-fill'; break;
+    }
+
+    // 建立通知內容
+    notification.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi ${iconClass} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-${textClass === 'text-white' ? 'white' : 'dark'} me-2 m-auto" data-bs-dismiss="toast" aria-label="關閉"></button>
+        </div>
+    `;
+
+    // 建立或取得通知容器
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        // 確保容器有 position-fixed 或 position-absolute 以便顯示在頂層
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1100'; // 確保在 loading overlay 之上 (如果需要) 或其他元素之上
+        document.body.appendChild(toastContainer);
+    }
+
+    // 添加通知到容器
+    toastContainer.appendChild(notification);
+
+    // 顯示通知
+    const toast = new bootstrap.Toast(notification, {
+        delay: delay // 使用傳入的延遲時間
+    });
+    toast.show();
+
+    // 當 Toast 關閉時，從 DOM 中移除，避免累積
+    notification.addEventListener('hidden.bs.toast', function () {
+        notification.remove();
+    });
+}
+
+let currentFilteredData = [];    //Filtered data set
+let formulas = {};               //Formula or chart setting for each variable
+let currentVariable = '';        //The currently selected variable
 let startDateInput = '';
 let endDateInput = '';
 
-// 輔助函數 - 取得圖表類型中文名稱
+//Helper function -Get the Chinese name of the chart type
 function getChartTypeName(chartType) {
     switch(chartType) {
         case 'line': return '折線圖';
@@ -23,7 +80,7 @@ function getChartTypeName(chartType) {
     }
 }
 
-// 處理圖表切換顯示/隱藏
+//Handle chart switching to show/hide
 function setupChartToggles() {
     document.querySelectorAll('.chart-preview-toggle').forEach(toggle => {
         toggle.addEventListener('click', function() {
@@ -64,14 +121,14 @@ function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, ch
 
     let plotData = [];
     
-    // 創建 layout 時徹底修改標題設定方式
+    //Completely modify the title setting method when creating layout
     let layout = {
         margin: { t: 80, b: 60, l: 60, r: 60 },
         height: 400,
         autosize: true
     };
     
-    // 只有當標題非空時才設置標題
+    //Set the title only if it is not empty
     if (finalTitle !== "") {
         layout.title = {
             text: finalTitle,
@@ -131,14 +188,14 @@ function generateChartPreview(varName, xAxis, yAxis, chartType, filteredData, ch
         }
     };
     
-    // 清除先前的圖表
+    //Clear previous chart
     Plotly.purge(plotArea);
     
-    // 繪製新圖表，確保標題已正確設定
+    //Draw a new chart to make sure the title is set correctly
     Plotly.newPlot(plotArea, plotData, layout, config);
 }
 
-// 新增函數：設置快速修改按鈕功能
+//New function: Set the quick modification button function
 function setupQuickEditButtons() {
     document.querySelectorAll('.quick-edit-chart-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -151,10 +208,10 @@ function setupQuickEditButtons() {
     });
 }
 
-// 新增函數：快速修改彈出窗口
-// 新增函數：快速修改彈出窗口
+//New function: Quickly modify pop-up window
+//New function: Quickly modify pop-up window
 function openQuickEditModal(varName, chartSetting) {
-    // 創建快速修改的 Modal HTML
+    //Create fast modified Modal HTML
     const modalHTML = `
         <div class="modal fade" id="quickEditModal" tabindex="-1" aria-labelledby="quickEditModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -206,18 +263,18 @@ function openQuickEditModal(varName, chartSetting) {
         </div>
     `;
     
-    // 如果頁面上已經有 quickEditModal 則移除
+    //If there is already quickEditModal on the page, remove it
     const existingModal = document.getElementById('quickEditModal');
     if (existingModal) {
         existingModal.remove();
     }
     
-    // 添加 Modal 到頁面
+    //Add Modal to the page
     const modalContainer = document.createElement('div');
     modalContainer.innerHTML = modalHTML;
     document.body.appendChild(modalContainer.firstElementChild);
     
-    // 載入 X、Y 軸選項
+    //Load X and Y axis options
     fetch('/get_columns')
         .then(response => response.json())
         .then(data => {
@@ -239,28 +296,28 @@ function openQuickEditModal(varName, chartSetting) {
                     yAxisSelect.appendChild(yOption);
                 });
                 
-                // 設置當前值
+                //Set the current value
                 xAxisSelect.value = chartSetting.x;
                 yAxisSelect.value = chartSetting.y;
                 document.getElementById('quickEditChartType').value = chartSetting.chartType;
                 
-                // 修正：正確設定圖表標題到輸入框
+                //Fixed: Correctly set the chart title to the input box
                 const titleInput = document.getElementById('quickEditChartTitle');
                 titleInput.value = chartSetting.chartTitle || '';
             }
         });
     
-    // 顯示 Modal
+    //Show Modal
     const quickEditModal = new bootstrap.Modal(document.getElementById('quickEditModal'));
     quickEditModal.show();
     
-    // 綁定保存按鈕事件
+    //Bind Save Button Event
     document.getElementById('saveQuickEditBtn').addEventListener('click', function() {
         const newXAxis = document.getElementById('quickEditXAxis').value;
         const newYAxis = document.getElementById('quickEditYAxis').value;
         const newChartType = document.getElementById('quickEditChartType').value;
         
-        // 獲取標題輸入框的值，但不進行 trim 處理
+        //Get the value of the title input box, but does not perform trim processing
         const newChartTitle = document.getElementById('quickEditChartTitle').value;
         
         if (!newXAxis || !newYAxis) {
@@ -268,16 +325,16 @@ function openQuickEditModal(varName, chartSetting) {
             return;
         }
     
-        // 更新 formulas 物件
+        //Update formulas objects
         formulas[currentVariable] = {
             type: 'chart',
             x: newXAxis,
             y: newYAxis,
             chartType: newChartType,
-            chartTitle: newChartTitle  // 直接使用輸入值，不進行加工
+            chartTitle: newChartTitle  //Use the input value directly without processing
         };
     
-        // 呼叫後端重新生成圖
+        //Regenerate the image of the call backend
         fetch('/regenerate_chart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -286,7 +343,7 @@ function openQuickEditModal(varName, chartSetting) {
                 x: newXAxis,
                 y: newYAxis,
                 chartType: newChartType,
-                chartTitle: newChartTitle,  // 確保標題被傳遞到後端
+                chartTitle: newChartTitle,  //Make sure the title is passed to the backend
                 dpi: parseFloat(document.getElementById('quickEditDpi').value), 
                 data: currentFilteredData.map(row => ({
                     [newXAxis]: row[newXAxis],
@@ -300,11 +357,11 @@ function openQuickEditModal(varName, chartSetting) {
                 alert('❌ 重繪圖表失敗: ' + result.error);
             } else {
                 alert('✅ 成功重新產生圖表');
-                // 關閉 Modal
+                //Close Modal
                 const quickEditModal = bootstrap.Modal.getInstance(document.getElementById('quickEditModal'));
                 quickEditModal.hide();
                 
-                // 重新計算並渲染所有內容
+                //Recalculate and render everything
                 calculateAndRender();
             }
         })
@@ -314,7 +371,7 @@ function openQuickEditModal(varName, chartSetting) {
     });    
 }
 
-// ====== 1. 套用篩選日期 ======
+//====== 1. Apply filter date =======
 document.getElementById('filterForm').addEventListener('submit', function(e) {
     e.preventDefault();
     showLoading();
@@ -324,7 +381,8 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
 
     if (!startDateInput || !endDateInput) {
         hideLoading();
-        alert('請選擇起始和結束日期！');
+        // alert('請選擇起始和結束日期！');
+        showNotification('請選擇起始和結束日期！', 'warning');
         return;
     }
 
@@ -337,29 +395,31 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
     .then(data => {
         currentFilteredData = data;
         hideLoading();
-        alert(`成功套用篩選條件！目前資料量：${data.length} 筆`);
+        // alert(`成功套用篩選條件！目前資料量：${data.length} 筆`);
+        showNotification(`成功套用篩選條件！目前資料量：${data.length} 筆`, 'success');
         document.getElementById('generateSection').style.display = 'block';
 
-        // 更新 start_date, end_date 的顯示
+        //Update the display of start_date, end_date
         const startSpan = document.querySelector('[data-variable="start_date"]');
         const endSpan = document.querySelector('[data-variable="end_date"]');
         if (startSpan) startSpan.textContent = startDateInput;
         if (endSpan) endSpan.textContent = endDateInput;
 
-        // 儲存到 formulas，作為固定文字
+        //Save to formulas as fixed text
         formulas['start_date'] = { type: 'fixed', value: `${startDateInput}` };
         formulas['end_date'] = { type: 'fixed', value: `${endDateInput}` };
 
-        // 篩選完成後自動計算
+        //Automatic calculation after filtering is completed
         calculateAndRender();
     })
     .catch(err => {
         hideLoading();
+        showNotification('篩選資料失敗，請檢查網路或後端服務。', 'danger');
         console.error('篩選資料失敗', err);
     });
 });
 
-// ====== 2. 點擊變數打開設定公式小視窗 ======
+//===== 2. Click on the variable to open the small window for setting formulas =======
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('editable')) {
         currentVariable = e.target.getAttribute('data-variable');
@@ -420,7 +480,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 切換 公式 / 圖表 顯示不同欄位
+//Switch Formula/Graph Show different columns
 document.getElementsByName('variableType').forEach(radio => {
     radio.addEventListener('change', function() {
         if (this.value === 'formula') {
@@ -433,7 +493,7 @@ document.getElementsByName('variableType').forEach(radio => {
     });
 });
 
-// ====== 3. 儲存公式設定，並即時計算並更新畫面 ======
+//===== 3. Save formula settings, calculate and update the screen instantly ======
 document.getElementById('saveFormulaBtn').addEventListener('click', function() {
     const selectedType = document.querySelector('input[name="variableType"]:checked').value;
 
@@ -478,7 +538,7 @@ document.getElementById('saveFormulaBtn').addEventListener('click', function() {
     calculateAndRender();
 });
 
-// ====== 4. 真正的「即時計算＋更新預覽」 ======
+//===== 4. The real "instant calculation + update preview" ======
 function calculateAndRender() {
     if (currentFilteredData.length === 0) {
         console.warn('尚未篩選資料！');
@@ -491,7 +551,7 @@ function calculateAndRender() {
 
     showLoading();
 
-    // 除錯用：顯示所有圖表設定
+    //Default: Show all chart settings
     Object.keys(formulas).forEach(key => {
         if (formulas[key].type === 'chart') {
             console.log(`圖表設定檢查 (${key}):`, JSON.stringify(formulas[key]));
@@ -517,7 +577,7 @@ function calculateAndRender() {
             if (formulas[varName] && formulas[varName].type === 'chart') {
                 const setting = formulas[varName];
                 
-                // 除錯用：記錄在處理圖表時的標題值
+                //Decryption: Record the title value when processing the chart
                 console.log(`處理變數 ${varName} 的圖表，標題設定:`, JSON.stringify(setting));
 
                 const filteredData = currentFilteredData
@@ -557,14 +617,14 @@ function calculateAndRender() {
                 `;
                 span.innerHTML = chartHTML;
 
-                // 關鍵修正：確保標題正確傳遞！
+                //Key correction: Make sure the title is delivered correctly!
                 generateChartPreview(
                     varName, 
                     setting.x, 
                     setting.y, 
                     setting.chartType, 
                     filteredData,
-                    setting.chartTitle  // 直接傳遞 setting.chartTitle，不做任何處理
+                    setting.chartTitle  //Pass setting.chartTitle directly without any processing
                 );
 
             } else if (results[varName] !== undefined) {
@@ -591,7 +651,7 @@ function calculateAndRender() {
     });
 }
 
-// ====== 5. 最後一鍵產生 Word 報告 ======
+//===== 5. The last button generates a Word report =======
 document.getElementById('generateForm').addEventListener('submit', function(e) {
     e.preventDefault();
     showLoading();
@@ -616,7 +676,7 @@ document.getElementById('generateForm').addEventListener('submit', function(e) {
         const filenameInput = document.getElementById('docxFileName').value.trim() || 'weekly_report.docx';
         let finalFilename = filenameInput;
         if (!finalFilename.toLowerCase().endsWith('.docx')) {
-            finalFilename += '.docx';  // 自動補上 .docx
+            finalFilename += '.docx';  //Automatically fill in .docx
         }
         a.download = finalFilename;
         document.body.appendChild(a);
@@ -629,7 +689,7 @@ document.getElementById('generateForm').addEventListener('submit', function(e) {
     });
 });
 
-// ====== 6. 儲存公式設定成 settings.json ======
+//===== 6. Set the storage formula to settings.json ======
 document.getElementById('saveSettingsBtn').addEventListener('click', function() {
     showLoading();
     
@@ -655,7 +715,7 @@ document.getElementById('saveSettingsBtn').addEventListener('click', function() 
     });
 });
 
-// ====== 7. 載入設定檔 settings.json ======
+//====== 7. Load settings.json ======
 document.getElementById('loadSettingsBtn').addEventListener('click', function() {
     showLoading();
     
@@ -681,7 +741,7 @@ document.getElementById('loadSettingsBtn').addEventListener('click', function() 
     });
 });
 
-// ====== 8. 頁面一進來自動嘗試載入 settings.json ======
+//====== 8. As soon as the page comes in, it automatically tries to load settings.json ======
 window.addEventListener('DOMContentLoaded', function() {
     fetch('/load_settings')
     .then(response => {
@@ -705,6 +765,6 @@ window.addEventListener('DOMContentLoaded', function() {
         console.log('ℹ️ 沒有設定檔，不處理');
     });
     
-    // 確保在一開始就設置好圖表切換功能（如果頁面上已有圖表）
+    //Make sure to set the chart switching function at the beginning (if there is a chart on the page)
     setupChartToggles();
 });
