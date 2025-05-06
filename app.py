@@ -539,139 +539,306 @@ def render_preview():
 
 @app.route('/render', methods=['POST'])
 def render_word():
-    global cached_docx_path
+    global cached_docx_path # Ensure this global variable is accessible
 
     formulas = request.json.get('formulas', {})
     data = request.json.get('data', [])
     filename = request.json.get('filename', 'final_report.docx')
 
+    if not cached_docx_path or not os.path.exists(cached_docx_path):
+         return "錯誤：找不到 Word 模板文件。", 400
     if not data:
-        return "資料錯誤", 400
+        return "錯誤：沒有提供用於渲染的數據。", 400
 
-    filtered_df = pd.DataFrame(data)
+    try:
+        filtered_df = pd.DataFrame(data)
+        # Convert date column to datetime if it exists and isn't already
+        # Assuming date_column is known globally or can be inferred
+        # if date_column and date_column in filtered_df.columns:
+        #     filtered_df[date_column] = pd.to_datetime(filtered_df[date_column], errors='coerce')
+
+    except Exception as e:
+        print(f"Error creating DataFrame from data: {e}")
+        return f"錯誤：處理輸入數據時出錯: {str(e)}", 400
+
     context = {}
-    calculated_context = {}
+    calculated_context = {} # Keep track of calculated values for dependencies
 
-    # 計算公式的依賴關係
+    # --- Explicitly add start_date and end_date ---
+    # Ensure they are set before potentially complex formula evaluations.
+    if 'start_date' in formulas and isinstance(formulas['start_date'], dict) and formulas['start_date'].get('type') == 'fixed':
+        start_date_val = formulas['start_date'].get('value', '')
+        context['start_date'] = start_date_val
+        calculated_context['start_date'] = start_date_val
+        print(f"DEBUG (render_word): Explicitly set start_date in context: {start_date_val}")
+
+    if 'end_date' in formulas and isinstance(formulas['end_date'], dict) and formulas['end_date'].get('type') == 'fixed':
+        end_date_val = formulas['end_date'].get('value', '')
+        context['end_date'] = end_date_val
+        calculated_context['end_date'] = end_date_val
+        print(f"DEBUG (render_word): Explicitly set end_date in context: {end_date_val}")
+
+    # --- Topological Sort Logic ---
     formula_graph = {}
+    valid_vars = set(formulas.keys()) # Keep track of variables defined in formulas
+
     for var, formula_info in formulas.items():
-        if isinstance(formula_info, dict) and formula_info.get('type') == 'formula':
-            formula = formula_info.get('value', '')
-        else:
-            formula = formula_info
+        # Skip dates if already handled
+        if var in ['start_date', 'end_date'] and var in context:
+             continue
+
+        formula = '' # Default to empty string
+        if isinstance(formula_info, dict):
+            if formula_info.get('type') == 'formula':
+                formula = formula_info.get('value', '')
+        elif isinstance(formula_info, str): # Handle case where formula is just a string
+             formula = formula_info
+        # else: # Charts or other types have no formula string for dependency check
+
         dependencies = set()
-        for other_var in formulas:
-            if other_var != var and isinstance(formula, str) and re.search(r'\b' + re.escape(other_var) + r'\b', formula):
-                dependencies.add(other_var)
+        if isinstance(formula, str) and formula: # Only check dependencies if formula is a non-empty string
+            # Find potential variable names (simple regex, might need refinement)
+            potential_deps = re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*', formula)
+            for dep in potential_deps:
+                # Check if the potential dependency is a defined variable, not the variable itself,
+                # and not a known function name (basic check, might need expansion)
+                 if dep in valid_vars and dep != var and dep.upper() not in ['SUM', 'MEAN', 'MAX', 'MIN', 'COUNT', 'MEDIAN', 'STD', 'VAR', 'PERCENT_CHANGE', 'DIFF', 'CAGR', 'MODE', 'DISTINCT', 'NP']:
+                     dependencies.add(dep)
         formula_graph[var] = dependencies
 
-    # 拓撲排序
+
     visited = set()
-    temp_visited = set()
+    recursion_stack = set() # To detect cycles
     order = []
 
     def topo_sort(node):
-        if node in temp_visited:
-            print(f"循環依賴: {node}")
+        if node not in valid_vars: # Skip if node isn't a defined variable
+             print(f"DEBUG (topo_sort): Node '{node}' not in valid_vars, skipping.")
+             return
+        # Skip dates if already handled
+        if node in ['start_date', 'end_date'] and node in context:
             return
+
+        if node in recursion_stack:
+            print(f"錯誤：偵測到循環依賴 involving '{node}'")
+            raise Exception(f"循環依賴: {node}") # Raise error on cycle
         if node in visited:
             return
-        temp_visited.add(node)
-        for dep in formula_graph.get(node, []):
-            topo_sort(dep)
-        temp_visited.remove(node)
+
         visited.add(node)
-        order.append(node)
+        recursion_stack.add(node)
 
+        # Ensure dependencies exist in the graph before recursing
+        for dep in formula_graph.get(node, []):
+             if dep in valid_vars:
+                 topo_sort(dep)
+             else:
+                 # This dependency might be a column name, not another formula variable.
+                 # Or it could be an error in the formula. Let evaluate_formula handle it later.
+                 print(f"DEBUG (topo_sort): Dependency '{dep}' for node '{node}' not in formula graph keys.")
+
+
+        recursion_stack.remove(node)
+        # Only add nodes that are actually defined in formulas to the order
+        order.append(node) # Add after visiting all dependencies
+
+    # Build the execution order
     for var in formulas:
-        if var not in visited:
-            topo_sort(var)
-
-    order.reverse()
-    print(f"公式計算順序: {order}")
-
-    doc = DocxTemplate(cached_docx_path)
-
-    # 先計算沒有依賴的公式
-    for var, setting in formulas.items():
-        if var not in order:
+         if var not in visited and var not in ['start_date', 'end_date']: # Avoid re-processing handled dates
             try:
-                if isinstance(setting, dict):
-                    if setting.get('type') == 'formula':
-                        expr = setting.get('value', '')
-                        value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
-                        if hasattr(value, "item"):
-                            value = value.item()
-                        if isinstance(value, (int, float)):
-                            value = round(value, 2)
-                        context[var] = value
-                        calculated_context[var] = value
-                    elif setting.get('type') == 'chart':
-                        x_col = setting.get('x')
-                        y_col = setting.get('y')
-                        chart_type = setting.get('chartType')
-                        chart_title = setting.get('chartTitle')
-                        if not x_col or not y_col or not chart_type:
-                            continue
-                        img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
-                        generate_chart(filtered_df, x_col, y_col, chart_type, chart_title=chart_title, output_path=img_path)
-                        context[var] = InlineImage(doc, img_path, width=Mm(120))
-                else:
-                    # 舊格式
-                    expr = setting
-                    value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
-                    if hasattr(value, "item"):
-                        value = value.item()
-                    if isinstance(value, (int, float)):
-                        value = round(value, 2)
-                    context[var] = value
-                    calculated_context[var] = value
+                topo_sort(var)
             except Exception as e:
-                context[var] = f"錯誤: {str(e)}"
+                 print(f"Error during topological sort for var '{var}': {e}")
+                 # Return error if cycle detected during sort
+                 return f"公式計算順序錯誤（可能存在循環依賴）: {str(e)}", 500
 
-    # 按依賴順序計算其餘公式
+
+    # No need to reverse if appending happens after visiting dependencies
+    print(f"DEBUG (render_word): Formula calculation order: {order}")
+
+    # --- Initialize DocxTemplate ---
+    try:
+        doc = DocxTemplate(cached_docx_path)
+    except Exception as e:
+         print(f"Error loading DocxTemplate: {e}")
+         return f"錯誤：無法加載 Word 模板 '{os.path.basename(cached_docx_path)}': {str(e)}", 500
+
+
+    # --- Process variables ---
+    # Process variables NOT necessarily in the determined order first,
+    # especially fixed values or those without dependencies that weren't explicitly handled (like dates).
+    for var, setting in formulas.items():
+        if var not in order and var not in context: # Check if not already processed by explicit handling or order
+            print(f"DEBUG (render_word): Processing non-ordered var: {var}")
+            try:
+                value_to_set = None
+                is_chart = False
+                if isinstance(setting, dict):
+                    var_type = setting.get('type')
+                    if var_type == 'formula':
+                         # Evaluate only if no dependencies or handled dependencies
+                        expr = setting.get('value', '')
+                        # Be cautious evaluating here, dependencies might not be ready.
+                        # Better to rely on the 'order' loop for formulas.
+                        # Maybe set as placeholder? For now, let's attempt evaluation.
+                        value_to_set = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+                    elif var_type == 'fixed':
+                         value_to_set = setting.get('value', '')
+                    elif var_type == 'chart':
+                         is_chart = True # Mark as chart, handle in the main loop
+                         context[var] = "[圖表將在此生成]" # Placeholder
+                    else: # Unknown dict type
+                         value_to_set = str(setting) # Convert dict to string as fallback
+
+                else: # Handle cases where 'setting' is not a dictionary (e.g., simple value)
+                    # Could be a simple formula string - attempt evaluation
+                    try:
+                         value_to_set = evaluate_formula(str(setting), filtered_df, context=calculated_context, formulas=formulas)
+                    except ValueError: # If evaluation fails, treat as literal string
+                         value_to_set = str(setting)
+
+
+                # Common post-processing for non-chart numeric values
+                if not is_chart and value_to_set is not None:
+                    if hasattr(value_to_set, "item"): # Convert numpy types
+                        value_to_set = value_to_set.item()
+                    if isinstance(value_to_set, (int, float)):
+                         value_to_set = round(value_to_set, 2) # Round numeric results
+
+                    context[var] = value_to_set
+                    calculated_context[var] = value_to_set # Update calculated context
+                    print(f"DEBUG (render_word): Set non-ordered var '{var}' in context: {value_to_set}")
+
+            except Exception as e:
+                print(f"錯誤：處理非順序變數 '{var}' 時出錯: {e}")
+                context[var] = f"[錯誤: {str(e)}]"
+                calculated_context[var] = None # Mark as error in calculated context
+
+
+    # --- Process variables IN topological order ---
     for var in order:
+        # Ensure the variable is actually in formulas before processing
+        if var not in formulas:
+             print(f"警告 (render_word): 變數 '{var}' 在計算順序中但不在 formulas 中，跳過。")
+             continue
+        # Skip if already processed (e.g., fixed values handled above)
+        if var in context and not (isinstance(formulas[var], dict) and formulas[var].get('type') == 'chart' and context[var] == "[圖表將在此生成]"):
+            print(f"DEBUG (render_word): Var '{var}' already in context, skipping ordered processing.")
+            continue
+
+        print(f"DEBUG (render_word): Processing ordered var: {var}")
         try:
             setting = formulas[var]
+            value_to_set = None # Reset for each variable
+            is_chart = False
+
             if isinstance(setting, dict):
-                if setting.get('type') == 'formula':
+                var_type = setting.get('type')
+                if var_type == 'formula':
                     expr = setting.get('value', '')
-                    value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
-                    if hasattr(value, "item"):
-                        value = value.item()
-                    if isinstance(value, (int, float)):
-                        value = round(value, 2)
-                    context[var] = value
-                    calculated_context[var] = value
-                elif setting.get('type') == 'chart':
+                    print(f"DEBUG (render_word): Evaluating formula for '{var}': {expr}")
+                    value_to_set = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
+
+                elif var_type == 'chart':
+                    is_chart = True
                     x_col = setting.get('x')
                     y_col = setting.get('y')
                     chart_type = setting.get('chartType')
-                    chart_title = setting.get('chartTitle')
+                    chart_title = setting.get('chartTitle') # Get chart title
+                    # Use a default DPI scale if not provided
+                    dpi_scale_str = setting.get('dpi', '2') # Get DPI setting as string
+                    try:
+                        dpi_scale = float(dpi_scale_str)
+                    except (ValueError, TypeError):
+                        print(f"警告：圖表 '{var}' 的 DPI 設定 '{dpi_scale_str}' 無效，使用預設值 2。")
+                        dpi_scale = 2
+
+
                     if not x_col or not y_col or not chart_type:
+                        print(f"警告 (render_word): 圖表 '{var}' 缺少設定 (X:{x_col}, Y:{y_col}, Type:{chart_type})，跳過。")
+                        context[var] = "[圖表設定不完整]"
                         continue
+                     # Ensure columns exist in DataFrame
+                    if x_col not in filtered_df.columns or y_col not in filtered_df.columns:
+                         print(f"錯誤 (render_word): 圖表 '{var}' 所需欄位 ({x_col}, {y_col}) 不在資料中，跳過。")
+                         context[var] = f"[錯誤：找不到欄位 {x_col} 或 {y_col}]"
+                         continue
+
                     img_path = os.path.join(GENERATED_FOLDER, f"{var}.png")
-                    generate_chart(filtered_df, x_col, y_col, chart_type, chart_title=chart_title, output_path=img_path)
-                    context[var] = InlineImage(doc, img_path, width=Mm(120))
-            else:
-                expr = setting
-                value = evaluate_formula(expr, filtered_df, context=calculated_context, formulas=formulas)
-                if hasattr(value, "item"):
-                    value = value.item()
-                if isinstance(value, (int, float)):
-                    value = round(value, 2)
-                context[var] = value
-                calculated_context[var] = value
+                    print(f"DEBUG (render_word): Generating chart for '{var}' with title: '{chart_title}', DPI scale: {dpi_scale}")
+                    generate_chart(
+                        filtered_df,
+                        x_col,
+                        y_col,
+                        chart_type,
+                        img_path, # Pass output path directly
+                        chart_title=chart_title, # Pass the title
+                        dpi_scale=dpi_scale # Pass DPI scale
+                        )
+                    # Add InlineImage to context if image generation succeeded
+                    if os.path.exists(img_path):
+                         context[var] = InlineImage(doc, img_path, width=Mm(120)) # Adjust width as needed
+                         print(f"DEBUG (render_word): Added chart '{var}' to context.")
+                    else:
+                         print(f"錯誤 (render_word): 圖表 '{var}' 圖片生成失敗或未找到。")
+                         context[var] = "[圖表生成失敗]"
+                    # Charts don't usually add to calculated_context unless their result is needed elsewhere
+
+                elif var_type == 'fixed': # Should have been handled above, but catch just in case
+                    value_to_set = setting.get('value', '')
+                else: # Unknown dict type
+                     value_to_set = str(setting)
+
+            else: # Handle non-dict formulas/values if they end up in 'order'
+                 print(f"DEBUG (render_word): Evaluating non-dict formula/value for '{var}': {setting}")
+                 try:
+                     value_to_set = evaluate_formula(str(setting), filtered_df, context=calculated_context, formulas=formulas)
+                 except ValueError as ve:
+                     # If evaluation fails, treat as literal string? Or report error?
+                     print(f"警告：評估非字典變數 '{var}' 時出錯 ({ve})，將其視為字串。")
+                     value_to_set = str(setting)
+
+            # Common post-processing and context update for non-chart variables
+            if not is_chart and value_to_set is not None:
+                 if hasattr(value_to_set, "item"): # Convert numpy types
+                     value_to_set = value_to_set.item()
+                 if isinstance(value_to_set, (int, float)):
+                    # Apply rounding only if it's not already a string representation
+                    if not isinstance(value_to_set, str):
+                         value_to_set = round(value_to_set, 2)
+
+                 context[var] = value_to_set
+                 calculated_context[var] = value_to_set # Update calculated context
+                 print(f"DEBUG (render_word): Set ordered var '{var}' in context: {value_to_set}")
+            elif not is_chart and value_to_set is None:
+                 print(f"警告 (render_word): 變數 '{var}' 計算結果為 None。")
+                 context[var] = "" # Set empty string for None results in template? Or handle differently?
+                 calculated_context[var] = None
+
+
         except Exception as e:
-            context[var] = f"錯誤: {str(e)}"
+            print(f"錯誤：處理順序變數 '{var}' 時發生嚴重錯誤: {e}")
+            import traceback
+            traceback.print_exc() # Print full traceback for debugging
+            context[var] = f"[處理錯誤: {str(e)}]"
+            calculated_context[var] = None # Mark as error in calculated context
 
-    doc.render(context)
-
-    # output_path = os.path.join(GENERATED_FOLDER, 'final_report.docx')
-    output_path = os.path.join(GENERATED_FOLDER, filename)
-    doc.save(output_path)
-
-    return send_file(output_path, as_attachment=True, download_name=filename)
+    # --- Final rendering ---
+    try:
+        print(f"DEBUG (render_word): Final context for rendering: {context}") # Debug: print final context
+        doc.render(context)
+        output_path = os.path.join(GENERATED_FOLDER, filename)
+        # Ensure the generated folder exists
+        os.makedirs(GENERATED_FOLDER, exist_ok=True)
+        doc.save(output_path)
+        print(f"INFO (render_word): Word document saved to {output_path}")
+        return send_file(output_path, as_attachment=True, download_name=filename)
+    except Exception as e:
+         print(f"錯誤：最終渲染 Word 文件 '{filename}' 時出錯: {e}")
+         import traceback
+         traceback.print_exc()
+         # Consider returning an error response to the user
+         return f"渲染 Word 時發生嚴重錯誤: {str(e)}", 500
 
 @app.route('/save_settings', methods=['POST'])
 def save_settings():
