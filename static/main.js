@@ -396,7 +396,7 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
         currentFilteredData = data;
         hideLoading();
         // alert(`成功套用篩選條件！目前資料量：${data.length} 筆`);
-        showNotification(`成功套用篩選條件！目前資料量：${data.length} 筆`, 'success');
+        showNotification(`成功套用篩選條件！目前資料量：${data.length} 筆`, 'primary');
         document.getElementById('generateSection').style.display = 'block';
 
         //Update the display of start_date, end_date
