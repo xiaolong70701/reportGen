@@ -1,0 +1,16 @@
+\frametitle{Handling Callback and Picker Token}
+\begin{lstlisting}[language=Python, breaklines=true, basicstyle=\fontsize{6.5pt}{7.8pt}\selectfont]
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=['https://www.googleapis.com/auth/drive.readonly'],
+        redirect_uri=url_for('oauth2callback', _external=True)
+    )
+    flow.fetch_token(authorization_response=request.url)
+
+    credentials = flow.credentials
+    session['access_token'] = credentials.token
+
+    return render_template('picker.html', token=credentials.token)
+\end{lstlisting}
